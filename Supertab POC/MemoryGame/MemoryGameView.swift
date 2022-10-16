@@ -9,14 +9,9 @@ import SwiftUI
 
 struct MemoryGameView: View {
     @ObservedObject var game = MemoryGameMachine()
+    @State var showingResetConfirmationAlert = false;
     var body: some View {
         VStack {
-            Spacer()
-            Button {
-                game.send(.reset)
-            } label: {
-                Text("Start new game")
-            }
             Spacer()
             if game.currentState == .won {
                 Text("You won! Score: \(game.context.numMismatchesLeft)/\(game.context.allowedNumMismatches)").font(.largeTitle)
@@ -41,8 +36,27 @@ struct MemoryGameView: View {
                 }
             }
             Spacer()
+            Button {
+                if game.currentState == .won || game.currentState == .lost {
+                    game.send(.reset)
+                } else {
+                    showingResetConfirmationAlert = true
+                }
+            } label: {
+                Text("Start new game")
+            }
+            Spacer()
         }
         .padding()
+        .alert(isPresented: $showingResetConfirmationAlert) {
+            Alert(
+                title: Text("Do you want to start a new game?"),
+                primaryButton: .destructive(Text("Start a new game")) {
+                    game.send(.reset)
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
 }
 

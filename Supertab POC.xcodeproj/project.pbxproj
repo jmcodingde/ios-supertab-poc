@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DF40B3A028FC663F00F754AD /* TabIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF40B39F28FC663F00F754AD /* TabIndicatorView.swift */; };
 		DFC9FAEB28F704B400CBDFA7 /* Supertab_POCApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */; };
 		DFC9FAED28F704B400CBDFA7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */; };
 		DFC9FAEF28F704B500CBDFA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFC9FAEE28F704B500CBDFA7 /* Assets.xcassets */; };
@@ -15,9 +16,11 @@
 		DFD9801C28F965E400A58D6E /* MemoryGameMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9801B28F965E400A58D6E /* MemoryGameMachine.swift */; };
 		DFD9801E28F98DBC00A58D6E /* MemoryGameCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9801D28F98DBC00A58D6E /* MemoryGameCardView.swift */; };
 		DFD9802028F9913200A58D6E /* MemoryGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9801F28F9913200A58D6E /* MemoryGameView.swift */; };
+		DFD9802428FC566600A58D6E /* PurchaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9802328FC566600A58D6E /* PurchaseView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DF40B39F28FC663F00F754AD /* TabIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabIndicatorView.swift; sourceTree = "<group>"; };
 		DFC9FAE728F704B400CBDFA7 /* Supertab POC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Supertab POC.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supertab_POCApp.swift; sourceTree = "<group>"; };
 		DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -27,6 +30,7 @@
 		DFD9801B28F965E400A58D6E /* MemoryGameMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameMachine.swift; sourceTree = "<group>"; };
 		DFD9801D28F98DBC00A58D6E /* MemoryGameCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameCardView.swift; sourceTree = "<group>"; };
 		DFD9801F28F9913200A58D6E /* MemoryGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameView.swift; sourceTree = "<group>"; };
+		DFD9802328FC566600A58D6E /* PurchaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +63,7 @@
 		DFC9FAE928F704B400CBDFA7 /* Supertab POC */ = {
 			isa = PBXGroup;
 			children = (
+				DFD9802228FC560E00A58D6E /* Purchase */,
 				DFD9802128FC0FBF00A58D6E /* MemoryGame */,
 				DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */,
 				DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */,
@@ -85,6 +90,15 @@
 				DFD9801D28F98DBC00A58D6E /* MemoryGameCardView.swift */,
 			);
 			path = MemoryGame;
+			sourceTree = "<group>";
+		};
+		DFD9802228FC560E00A58D6E /* Purchase */ = {
+			isa = PBXGroup;
+			children = (
+				DFD9802328FC566600A58D6E /* PurchaseView.swift */,
+				DF40B39F28FC663F00F754AD /* TabIndicatorView.swift */,
+			);
+			path = Purchase;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -157,6 +171,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF40B3A028FC663F00F754AD /* TabIndicatorView.swift in Sources */,
+				DFD9802428FC566600A58D6E /* PurchaseView.swift in Sources */,
 				DFD9801C28F965E400A58D6E /* MemoryGameMachine.swift in Sources */,
 				DFD9802028F9913200A58D6E /* MemoryGameView.swift in Sources */,
 				DFC9FAED28F704B400CBDFA7 /* ContentView.swift in Sources */,
@@ -297,8 +313,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -306,9 +321,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "jmcoding.Supertab-POC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -326,8 +344,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -335,9 +352,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "jmcoding.Supertab-POC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
