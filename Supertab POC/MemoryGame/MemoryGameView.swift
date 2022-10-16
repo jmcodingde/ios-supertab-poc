@@ -19,11 +19,11 @@ struct MemoryGameView: View {
             }
             Spacer()
             if game.currentState == .won {
-                Text("You won! Score: \(game.context.numMismatchesLeft)").font(.largeTitle)
+                Text("You won! Score: \(game.context.numMismatchesLeft)/\(game.context.allowedNumMismatches)").font(.largeTitle)
             } else if game.currentState == .lost {
                 Text("You lost").font(.largeTitle)
             } else {
-                Text("\(game.context.numMismatchesLeft)").font(.largeTitle)
+                Text("Score: \(game.context.numMismatchesLeft)/\(game.context.allowedNumMismatches)").font(.largeTitle)
             }
             Spacer()
             let maxRow = game.context.numRows - 1;
