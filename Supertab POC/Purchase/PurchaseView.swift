@@ -19,26 +19,26 @@ struct Offering: Hashable {
 }
 
 struct PurchaseView: View {
-    let offerings: [Offering] = [
-        Offering(50, 1, "1 game"),
-        Offering(100, 2, "2 games"),
-        Offering(200, 5, "5 games")
-    ]
-    @State var selectedAmount = 50
-    @Environment(\.colorScheme) var colorScheme
-    var showDetails: Bool = false
+    let title: String;
+    let onConfirmPurchase: (Offering) -> Void
+    let onSelectOffering: (Offering) -> Void
+    let offerings: [Offering];
+    let selectedOffering: Offering?
+    let tab: Tab
+    
+    
     var body: some View {
         VStack {
-            Text("Want to play another game?")
+            Text(title)
                 .font(.title2)
                 .padding(.top)
                 .padding(.bottom)
             HStack {
                 ForEach(offerings, id: \.self) { offering in
-                    let isSelected = offering.amount == selectedAmount
+                    let isSelected = offering == selectedOffering
                     Button {
                         withAnimation {
-                            selectedAmount = offering.amount
+                            onSelectOffering(offering)
                         }
                     } label: {
                         VStack {
@@ -66,7 +66,11 @@ struct PurchaseView: View {
             .padding(.bottom)
             
             Button(action: {
-                
+                if let selectedOffering = selectedOffering {
+                    onConfirmPurchase(selectedOffering)
+                } else {
+                    print("Cannot confirm purchase, no offering selected")
+                }
             }) {
                 Text("Put it on my Tab")
                     .foregroundColor(Color(UIColor.systemBackground))
@@ -83,37 +87,33 @@ struct PurchaseView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
             
-            if showDetails {
-                HStack {
-                    TabIndicatorView(amount: 150, projectedAmount: 150 + selectedAmount, limit: 500, currencyCode: "USD")
-                        .frame(width: 100, height: 100)
-                        .padding(.leading)
-                        .padding(.vertical)
-                    VStack(alignment: .leading) {
-                        Text("The Tab makes it easy for you to buy only what you want.")
-                            .padding(.bottom, 1)
-                        Text("You'll only pay when your Tab reaches $5.")
-                    }
-                    .padding()
+            HStack {
+                TabIndicatorView(amount: tab.amount, projectedAmount: tab.amount + (selectedOffering?.amount ?? 0), limit: tab.limit, currencyCode: tab.currency)
+                    .frame(width: 100, height: 100)
+                    .padding(.leading)
+                    .padding(.vertical)
+                VStack(alignment: .leading) {
+                    Text("The Tab makes it easy for you to buy only what you want.")
+                        .padding(.bottom, 1)
+                    Text("You'll only pay when your Tab reaches $5.")
                 }
-                .frame(maxWidth: .infinity)
-                .overlay(
-                    RoundedRectangle(cornerRadius:10)
-                        .stroke(Color.primary, lineWidth: 2)
-                        .opacity(0.2)
-                )
-                .padding(.horizontal)
-                .padding(.bottom)
+                .padding()
             }
+            .frame(maxWidth: .infinity)
+            .overlay(
+                RoundedRectangle(cornerRadius:10)
+                    .stroke(Color.primary, lineWidth: 2)
+                    .opacity(0.2)
+            )
+            .padding(.horizontal)
+            .padding(.bottom)
             
             Spacer()
             
             HStack(alignment: .center) {
                 Text("Powered by")
                     .font(.subheadline)
-                Image(colorScheme == .light ? "SupertabLogo" : "SupertabLogoLight")
-                    .resizable()
-                    .scaledToFit()
+                SupertabLogo()
                     .frame(height: 20)
                     .padding(.vertical)
             }
@@ -123,6 +123,18 @@ struct PurchaseView: View {
 
 struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
-        PurchaseView(showDetails: true)
+        let offerings = [
+            Offering(50, 1, "1 game"),
+            Offering(100, 2, "2 games"),
+            Offering(200, 5, "5 games")
+        ]
+        PurchaseView(
+            title: "Want to play another game?",
+            onConfirmPurchase: { _ in },
+            onSelectOffering: { _ in },
+            offerings: offerings,
+            selectedOffering: nil,
+            tab: Tab(amount: 150, limit: 500, currency: "USD")
+        )
     }
 }
