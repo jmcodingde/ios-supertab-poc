@@ -23,7 +23,7 @@ let defaultOfferings = [
 struct ContentView: View {
     @State var showingTabSheet = false
     @State var tabSheetPresentationDetent = PresentationDetent.height(520)
-    @State var tab = Tab(amount: 150, limit: 500, currency: "USD")
+    @State var tab = Tab(amount: 0, limit: 500, currency: "USD")
     let offerings = defaultOfferings
     @State var selectedOffering: Offering? = defaultOfferings[0]
     @State var isPurchaseDone: Bool = false
@@ -72,14 +72,23 @@ struct ContentView: View {
                             tab.amount += offering.amount
                             isPurchaseDone = true
                         }
-                        self.tabSheetTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
-                            showingTabSheet = false
-                        }
+                        //self.tabSheetTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+                        //    showingTabSheet = false
+                        //}
                     }
                 },
                 onSelectOffering: { offering in
                     print("Selected offering: \(offering.description)")
                     selectedOffering = offering
+                },
+                onDismiss: {
+                    showingTabSheet = false
+                },
+                onPayWithApplePay: {
+                    withAnimation {
+                        isPurchaseDone = true
+                        tab.amount = 0
+                    }
                 },
                 offerings: offerings,
                 selectedOffering: selectedOffering,

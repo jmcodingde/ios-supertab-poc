@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		DF40B3A028FC663F00F754AD /* TabIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF40B39F28FC663F00F754AD /* TabIndicatorView.swift */; };
 		DF40B3A228FD4B2F00F754AD /* SupertabLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF40B3A128FD4B2F00F754AD /* SupertabLogo.swift */; };
+		DF66B0A828FDB98F00ABAC6C /* ApplePayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF66B0A728FDB98F00ABAC6C /* ApplePayButton.swift */; };
 		DFC9FAEB28F704B400CBDFA7 /* Supertab_POCApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */; };
 		DFC9FAED28F704B400CBDFA7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */; };
 		DFC9FAEF28F704B500CBDFA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFC9FAEE28F704B500CBDFA7 /* Assets.xcassets */; };
@@ -23,6 +24,7 @@
 /* Begin PBXFileReference section */
 		DF40B39F28FC663F00F754AD /* TabIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabIndicatorView.swift; sourceTree = "<group>"; };
 		DF40B3A128FD4B2F00F754AD /* SupertabLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupertabLogo.swift; sourceTree = "<group>"; };
+		DF66B0A728FDB98F00ABAC6C /* ApplePayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayButton.swift; sourceTree = "<group>"; };
 		DFC9FAE728F704B400CBDFA7 /* Supertab POC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Supertab POC.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supertab_POCApp.swift; sourceTree = "<group>"; };
 		DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 			children = (
 				DF40B39F28FC663F00F754AD /* TabIndicatorView.swift */,
 				DF40B3A128FD4B2F00F754AD /* SupertabLogo.swift */,
+				DF66B0A728FDB98F00ABAC6C /* ApplePayButton.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -185,6 +188,7 @@
 				DF40B3A028FC663F00F754AD /* TabIndicatorView.swift in Sources */,
 				DFD9802428FC566600A58D6E /* PurchaseView.swift in Sources */,
 				DFD9801C28F965E400A58D6E /* MemoryGameMachine.swift in Sources */,
+				DF66B0A828FDB98F00ABAC6C /* ApplePayButton.swift in Sources */,
 				DF40B3A228FD4B2F00F754AD /* SupertabLogo.swift in Sources */,
 				DFD9802028F9913200A58D6E /* MemoryGameView.swift in Sources */,
 				DFC9FAED28F704B400CBDFA7 /* ContentView.swift in Sources */,

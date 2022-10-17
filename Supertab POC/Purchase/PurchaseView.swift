@@ -22,20 +22,22 @@ struct PurchaseView: View {
     let title: String;
     let onConfirmPurchase: (Offering) -> Void
     let onSelectOffering: (Offering) -> Void
-    let offerings: [Offering];
+    let onDismiss: () -> Void
+    let onPayWithApplePay: () -> Void
+    let offerings: [Offering]
     let selectedOffering: Offering?
     let tab: Tab
-    var isDone: Bool = true
+    var isDone: Bool = false
     
     
     var body: some View {
         VStack {
-            Text(isDone ? "Thank you!" : title)
+            Text(tab.amount >= tab.limit ? "Pay your Tab" : isDone ? "Thank you!" : title)
                 .font(.title2)
                 .padding(.top)
                 .padding(.bottom)
             
-            if !isDone {
+            if !isDone && tab.amount < tab.limit {
                 HStack {
                     ForEach(offerings, id: \.self) { offering in
                         let isSelected = offering == selectedOffering
@@ -67,6 +69,7 @@ struct PurchaseView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom)
+                .transition(.opacity)
                 
                 Button(action: {
                     if let selectedOffering = selectedOffering {
@@ -84,35 +87,87 @@ struct PurchaseView: View {
                 .clipShape(Capsule())
                 .padding(.horizontal)
                 .padding(.bottom)
+                .transition(.opacity)
                 
                 Text("No credit card required")
                     .opacity(0.5)
                     .padding(.horizontal)
                     .padding(.bottom)
+                    .frame(maxWidth: .infinity)
+                    .transition(.opacity)
             }
-                
+            
             HStack {
                 TabIndicatorView(amount: tab.amount, projectedAmount: tab.amount + (selectedOffering?.amount ?? 0), limit: tab.limit, currencyCode: tab.currency)
                     .frame(width: 100, height: 100)
                     .padding(.leading)
                     .padding(.vertical)
                 VStack(alignment: .leading) {
-                    Text("The Tab makes it easy for you to buy only what you want.")
-                        .padding(.bottom, 1)
-                    Text("You'll only pay when your Tab reaches $5.")
+                    Text(
+                        tab.amount == 0 && isDone
+                        ? "Your Tab has been paid."
+                        : tab.amount == 0
+                        ? "The Tab makes it easy for you to buy only what you want."
+                        : tab.amount < tab.limit
+                        ? "You've used **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
+                        : "You've completed your Tab."
+                    )
+                    .padding(.bottom, 1)
+                    .id("TabDescription1")
+                    .transition(.scale)
+                    Text(
+                        tab.amount == 0 && isDone
+                        ? "You've used **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** of your new **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
+                        : tab.amount == 0
+                        ? "You'll only pay when your Tab reaches $5."
+                        : tab.amount < tab.limit
+                        ? ""
+                        : "Pay your **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** Tab to continue."
+                    )
+                    .id("TabDescription2")
+                    .transition(.scale)
                 }
                 .padding()
             }
             .frame(maxWidth: .infinity)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius:10)
                     .stroke(Color.primary, lineWidth: 2)
                     .opacity(0.2)
+                
             )
             .padding(.horizontal)
             .padding(.bottom)
             
+            if tab.amount >= tab.limit {
+                Button(action: onPayWithApplePay) {
+                    Text("")
+                }
+                .frame(height: 50)
+                .buttonStyle(ApplePayButtonStyle())
+                .cornerRadius(.infinity)
+                .padding(.horizontal)
+                .padding(.bottom)
+            }
+            
             Spacer()
+            
+            if isDone {
+                Button(action: onDismiss) {
+                    Text("Dismiss")
+                        .foregroundColor(Color.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                }
+                .background(Color.primary.opacity(0.2))
+                .cornerRadius(.infinity)
+                .padding(.horizontal)
+                .padding(.bottom)
+                .transition(.opacity)
+            }
+            
             
             HStack(alignment: .center) {
                 Text("Powered by")
@@ -136,6 +191,8 @@ struct PurchaseView_Previews: PreviewProvider {
             title: "Want to play another game?",
             onConfirmPurchase: { _ in },
             onSelectOffering: { _ in },
+            onDismiss: {},
+            onPayWithApplePay: {},
             offerings: offerings,
             selectedOffering: nil,
             tab: Tab(amount: 150, limit: 500, currency: "USD")
