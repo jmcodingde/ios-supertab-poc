@@ -25,68 +25,72 @@ struct PurchaseView: View {
     let offerings: [Offering];
     let selectedOffering: Offering?
     let tab: Tab
+    var isDone: Bool = true
     
     
     var body: some View {
         VStack {
-            Text(title)
+            Text(isDone ? "Thank you!" : title)
                 .font(.title2)
                 .padding(.top)
                 .padding(.bottom)
-            HStack {
-                ForEach(offerings, id: \.self) { offering in
-                    let isSelected = offering == selectedOffering
-                    Button {
-                        withAnimation {
-                            onSelectOffering(offering)
+            
+            if !isDone {
+                HStack {
+                    ForEach(offerings, id: \.self) { offering in
+                        let isSelected = offering == selectedOffering
+                        Button {
+                            withAnimation {
+                                onSelectOffering(offering)
+                            }
+                        } label: {
+                            VStack {
+                                Text("$\(String(format: "%.2f", Float(offering.amount)/100.00))")
+                                    .bold()
+                                    .font(.headline)
+                                Text(offering.description)
+                                    .font(.subheadline)
+                            }
+                            .padding()
+                            .foregroundColor(isSelected ? Color(UIColor.systemBackground) : .primary)
+                            .frame(maxWidth: .infinity)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .infinity)
+                                    .stroke(Color.primary, lineWidth: 3)
+                            )
+                            
                         }
-                    } label: {
-                        VStack {
-                            Text("$\(String(format: "%.2f", Float(offering.amount)/100.00))")
-                                .bold()
-                                .font(.headline)
-                            Text(offering.description)
-                                .font(.subheadline)
-                        }
-                        .padding()
-                        .foregroundColor(isSelected ? Color(UIColor.systemBackground) : .primary)
-                        .frame(maxWidth: .infinity)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: .infinity)
-                                .stroke(Color.primary, lineWidth: 3)
-                        )
+                        .background(isSelected ? Color.primary : Color(UIColor.systemBackground))
+                        .clipShape(Capsule())
                         
                     }
-                    .background(isSelected ? Color.primary : Color(UIColor.systemBackground))
-                    .clipShape(Capsule())
-                    
                 }
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
-            
-            Button(action: {
-                if let selectedOffering = selectedOffering {
-                    onConfirmPurchase(selectedOffering)
-                } else {
-                    print("Cannot confirm purchase, no offering selected")
-                }
-            }) {
-                Text("Put it on my Tab")
-                    .foregroundColor(Color(UIColor.systemBackground))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-            }
-            .background(Color.primary)
-            .clipShape(Capsule())
-            .padding(.horizontal)
-            .padding(.bottom)
-            
-            Text("No credit card required")
-                .opacity(0.5)
                 .padding(.horizontal)
                 .padding(.bottom)
-            
+                
+                Button(action: {
+                    if let selectedOffering = selectedOffering {
+                        onConfirmPurchase(selectedOffering)
+                    } else {
+                        print("Cannot confirm purchase, no offering selected")
+                    }
+                }) {
+                    Text("Put it on my Tab")
+                        .foregroundColor(Color(UIColor.systemBackground))
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                }
+                .background(Color.primary)
+                .clipShape(Capsule())
+                .padding(.horizontal)
+                .padding(.bottom)
+                
+                Text("No credit card required")
+                    .opacity(0.5)
+                    .padding(.horizontal)
+                    .padding(.bottom)
+            }
+                
             HStack {
                 TabIndicatorView(amount: tab.amount, projectedAmount: tab.amount + (selectedOffering?.amount ?? 0), limit: tab.limit, currencyCode: tab.currency)
                     .frame(width: 100, height: 100)
