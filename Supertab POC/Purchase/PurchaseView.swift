@@ -67,6 +67,7 @@ struct PurchaseView: View {
                 .padding(.bottom)
             
             if client.currentState == .showingOfferings || client.currentState == .fetchingTab {
+                let isLoading = client.currentState == .fetchingTab
                 HStack {
                     ForEach(client.context.offerings, id: \.self) { offering in
                         let isSelected = offering == client.context.selectedOffering
@@ -86,6 +87,7 @@ struct PurchaseView: View {
                             .overlay(
                                 RoundedRectangle(cornerRadius: .infinity)
                                     .stroke(Color.primary, lineWidth: 3)
+                                    .opacity(isLoading ? 0.4 : 1)
                             )
                             
                         }
@@ -97,6 +99,7 @@ struct PurchaseView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
                 .transition(.opacity)
+                .opacity(isLoading ? 0.5 : 1)
                 
                 Button(action: {
                     if let selectedOffering = client.context.selectedOffering {
@@ -115,6 +118,7 @@ struct PurchaseView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
                 .transition(.opacity)
+                .opacity(isLoading ? 0.5 : 1)
                 
                 Text("No credit card required")
                     .opacity(0.5)
