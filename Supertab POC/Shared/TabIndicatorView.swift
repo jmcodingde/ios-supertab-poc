@@ -13,7 +13,7 @@ struct TabIndicatorView: View {
     var limit: Int
     var currencyCode: String
     var gap = Angle.degrees(30.0)
-    var lineWidth: CGFloat = 7.0
+    var lineWidth: CGFloat = 8.0
     var fraction: Double { loading ? 0 : min(max(0, Double(amount) / Double(limit)), 1) }
     var endAngle: Angle { (.degrees(360.0) - gap) * fraction + gap / 2 }
     var projectedFraction: Double { loading ? 0 : min(max(0, Double(projectedAmount) / Double(limit)), 1) }
@@ -40,6 +40,9 @@ struct TabIndicatorView: View {
                 .strokeBorder(Color.primary, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
         }
         .opacity(loading ? 0.5: 1)
+        .animation(.default, value: amount)
+        .animation(.default, value: projectedAmount)
+        .animation(.default, value: limit)
     }
 }
 

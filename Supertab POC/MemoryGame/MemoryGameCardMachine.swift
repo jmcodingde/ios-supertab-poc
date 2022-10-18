@@ -50,7 +50,7 @@ class MemoryGameCardMachine: ObservableObject {
             print("Resetting \(context.face)")
             currentState = .cover
         default:
-            print("Can not handle event \(event) in state \(currentState)")
+            print("Cannot handle event \(event) in state \(currentState)")
         }
     }
 }

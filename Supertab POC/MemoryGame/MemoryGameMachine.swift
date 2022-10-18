@@ -146,7 +146,7 @@ class MemoryGameMachine: ObservableObject {
             context = MemoryGameActions.resetNumMismatchesLeft(context)
             currentState = initialMemoryGameState
         default:
-            print("Can not handle event \(event) in state \(currentState)")
+            print("Cannot handle event \(event) in state \(currentState)")
         }
         
     }

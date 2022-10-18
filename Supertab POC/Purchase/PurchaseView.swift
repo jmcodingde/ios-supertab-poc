@@ -7,44 +7,69 @@
 
 import SwiftUI
 
-struct Offering: Hashable {
-    let amount: Int
-    let numGames: Int
-    let description: String
-    init(_ amount: Int, _ numGames: Int, _ description: String) {
-        self.amount = amount
-        self.numGames = numGames
-        self.description = description
-    }
-}
-
 struct PurchaseView: View {
-    let title: String;
-    let onConfirmPurchase: (Offering) -> Void
-    let onSelectOffering: (Offering) -> Void
-    let onDismiss: () -> Void
-    let onPayWithApplePay: () -> Void
-    let offerings: [Offering]
-    let selectedOffering: Offering?
-    let tab: Tab
-    var isDone: Bool = false
-    
+    let defaultTitle: String;
+    @ObservedObject var client: TapperClientMachine
+    var title: String {
+        switch(client.currentState) {
+        case .paymentRequired:
+            return "Pay your Tab"
+        case .itemAdded, .tabPaid:
+            return "Thank you!"
+        default:
+            return defaultTitle
+        }
+    }
+    var firstParagraph: String {
+        switch client.currentState {
+        case .fetchingTab:
+            return ""
+        case .paymentRequired:
+            return "You've completed your Tab."
+        case .tabPaid:
+            return "Your Tab has been paid."
+        default:
+            if let tab = client.context.tab {
+                return "You've used **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
+            } else {
+                return "The Tab makes it easy for you to buy only what you want."
+            }
+        }
+    }
+    var secondParagraph: String {
+        switch client.currentState {
+        case .fetchingTab:
+            return ""
+        case .paymentRequired:
+            if let tab = client.context.tab {
+                return "Pay your **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** Tab to continue."
+            }
+        case .tabPaid:
+            return "You've used **\(formattedPrice(amount: 0, currencyCode: Tab.defaultCurrency))** of your new **\(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))** Tab."
+        default:
+            if let _ = client.context.tab {
+                return ""
+            } else {
+                return "You'll only pay when your Tab reaches \(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))."
+            }
+        }
+        return ""
+    }
     
     var body: some View {
+        let tab = client.context.tab
         VStack {
-            Text(tab.amount >= tab.limit ? "Pay your Tab" : isDone ? "Thank you!" : title)
+            Text(title)
                 .font(.title2)
                 .padding(.top)
                 .padding(.bottom)
             
-            if !isDone && tab.amount < tab.limit {
+            if client.currentState == .showingOfferings || client.currentState == .fetchingTab {
                 HStack {
-                    ForEach(offerings, id: \.self) { offering in
-                        let isSelected = offering == selectedOffering
+                    ForEach(client.context.offerings, id: \.self) { offering in
+                        let isSelected = offering == client.context.selectedOffering
                         Button {
-                            withAnimation {
-                                onSelectOffering(offering)
-                            }
+                            client.send(.selectOffering(offering))
                         } label: {
                             VStack {
                                 Text("$\(String(format: "%.2f", Float(offering.amount)/100.00))")
@@ -72,8 +97,8 @@ struct PurchaseView: View {
                 .transition(.opacity)
                 
                 Button(action: {
-                    if let selectedOffering = selectedOffering {
-                        onConfirmPurchase(selectedOffering)
+                    if let selectedOffering = client.context.selectedOffering {
+                        client.send(.addToTab(selectedOffering))
                     } else {
                         print("Cannot confirm purchase, no offering selected")
                     }
@@ -97,36 +122,22 @@ struct PurchaseView: View {
                     .transition(.opacity)
             }
             
-            HStack {
-                TabIndicatorView(amount: tab.amount, projectedAmount: tab.amount + (selectedOffering?.amount ?? 0), limit: tab.limit, currencyCode: tab.currency)
-                    .frame(width: 100, height: 100)
+            HStack(alignment: .center) {
+                TabIndicatorView(amount: tab?.amount ?? 0, projectedAmount: (tab?.amount ?? 0) + (client.context.selectedOffering?.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: client.currentState == .fetchingTab)
+                    .frame(width: 100, height: 120)
                     .padding(.leading)
                     .padding(.vertical)
+                    .id("tabIndicator")
                 VStack(alignment: .leading) {
-                    Text(
-                        tab.amount == 0 && isDone
-                        ? "Your Tab has been paid."
-                        : tab.amount == 0
-                        ? "The Tab makes it easy for you to buy only what you want."
-                        : tab.amount < tab.limit
-                        ? "You've used **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
-                        : "You've completed your Tab."
-                    )
-                    .padding(.bottom, 1)
-                    .id("TabDescription1")
-                    .transition(.scale)
-                    Text(
-                        tab.amount == 0 && isDone
-                        ? "You've used **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** of your new **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
-                        : tab.amount == 0
-                        ? "You'll only pay when your Tab reaches $5."
-                        : tab.amount < tab.limit
-                        ? ""
-                        : "Pay your **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** Tab to continue."
-                    )
-                    .id("TabDescription2")
-                    .transition(.scale)
+                    Text(.init(firstParagraph))
+                        .padding(.bottom, 1)
+                        .id("firstParagraph")
+                        .transition(.scale)
+                    Text(.init(secondParagraph))
+                        .id("secondParagraph")
+                        .transition(.scale)
                 }
+                .frame(maxWidth: .infinity)
                 .padding()
             }
             .frame(maxWidth: .infinity)
@@ -141,8 +152,10 @@ struct PurchaseView: View {
             .padding(.horizontal)
             .padding(.bottom)
             
-            if tab.amount >= tab.limit {
-                Button(action: onPayWithApplePay) {
+            if client.currentState == .paymentRequired {
+                Button {
+                    client.send(.startPayment)
+                } label: {
                     Text("")
                 }
                 .frame(height: 50)
@@ -154,8 +167,10 @@ struct PurchaseView: View {
             
             Spacer()
             
-            if isDone {
-                Button(action: onDismiss) {
+            if client.currentState == .itemAdded || client.currentState == .tabPaid {
+                Button {
+                    client.send(.dismiss)
+                } label: {
                     Text("Dismiss")
                         .foregroundColor(Color.primary)
                         .frame(maxWidth: .infinity)
@@ -182,20 +197,9 @@ struct PurchaseView: View {
 
 struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
-        let offerings = [
-            Offering(50, 1, "1 game"),
-            Offering(100, 2, "2 games"),
-            Offering(200, 5, "5 games")
-        ]
         PurchaseView(
-            title: "Want to play another game?",
-            onConfirmPurchase: { _ in },
-            onSelectOffering: { _ in },
-            onDismiss: {},
-            onPayWithApplePay: {},
-            offerings: offerings,
-            selectedOffering: nil,
-            tab: Tab(amount: 150, limit: 500, currency: "USD")
+            defaultTitle: "Want to play another game?",
+            client: TapperClientMachine(offerings: defaultOfferings, selectedOffering: defaultOfferings[0])
         )
     }
 }
