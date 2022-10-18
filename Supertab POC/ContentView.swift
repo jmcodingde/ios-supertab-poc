@@ -17,7 +17,7 @@ let defaultOfferings = [
 struct ContentView: View {
     @State var showingTabSheet = false
     @State var tabSheetPresentationDetent = PresentationDetent.height(520)
-    @ObservedObject var client = TapperClientMachine(offerings: defaultOfferings, selectedOffering: defaultOfferings[0])
+    @ObservedObject var client = TapperClientMachine(offerings: defaultOfferings, defaultOffering: defaultOfferings[0])
     var body: some View {
         NavigationView {
             List {

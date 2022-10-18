@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct Tab: Equatable {
     var amount: Int
@@ -27,6 +28,8 @@ struct Tab: Equatable {
         self.currency = Tab.defaultCurrency
     }
 }
+
+var globalTab: Tab?
 
 struct Offering: Hashable {
     let amount: Int
@@ -57,6 +60,7 @@ var tapperClientInitialState = TapperClientState.idle
 
 struct TapperClientContext {
     var offerings: [Offering]
+    var defaultOffering: Offering?
     var selectedOffering: Offering?
     var tab: Tab?
     var errorMessage: String?
@@ -83,7 +87,7 @@ enum TapperClientEvent: Equatable {
 enum TapperClientServices {
     static func fetchTab(_ send: @escaping (TapperClientEvent) -> Void) {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-            send(.fetchTabDone(Tab(amount: 450, limit: 500, currency: "usd")))
+            send(.fetchTabDone(globalTab))
         }
     }
     static func addToTab(_ send: @escaping (TapperClientEvent) -> Void, _ context: TapperClientContext, _ event: TapperClientEvent) {
@@ -97,6 +101,7 @@ enum TapperClientServices {
                     newTab = Tab()
                 }
                 newTab.amount += offering.amount
+                globalTab = newTab
                 send(.addToTabDone(newTab))
             default:
                 send(.addToTabError("Event not supported: \(event)"))
@@ -125,9 +130,9 @@ class TapperClientMachine: ObservableObject {
     @Published private(set) var currentState: TapperClientState
     @Published private(set) var context: TapperClientContext
     
-    init(offerings: [Offering], selectedOffering: Offering?) {
+    init(offerings: [Offering], defaultOffering: Offering?) {
         currentState = tapperClientInitialState
-        context = TapperClientContext(offerings: offerings, selectedOffering: selectedOffering)
+        context = TapperClientContext(offerings: offerings, defaultOffering: defaultOffering)
     }
     
     func isTabFull() -> Bool {
@@ -139,13 +144,20 @@ class TapperClientMachine: ObservableObject {
     }
     
     func send(_ event: TapperClientEvent) {
+        DispatchQueue.main.async {
+            withAnimation {
+                self._send(event)
+            }
+        }
+    }
+    
+    private func _send(_ event: TapperClientEvent) {
         print("currentState: \(currentState)")
         print("event: \(event)")
         switch(currentState, event) {
         case (.idle, .startPurchase):
-            DispatchQueue.main.async {
-                self.currentState = .fetchingTab
-            }
+            context.selectedOffering = context.defaultOffering
+            currentState = .fetchingTab
             TapperClientServices.fetchTab(send)
         case (.fetchingTab, .fetchTabDone(let tab)):
             context.tab = tab
@@ -171,6 +183,7 @@ class TapperClientMachine: ObservableObject {
             TapperClientServices.confirmPaymentWithApplePay(send, context)
         case (.confirmingPayment, .confirmPaymentWithApplePayDone):
             context.tab = nil
+            globalTab = nil
             currentState = .tabPaid
         case (_, .dismiss):
             currentState = .idle

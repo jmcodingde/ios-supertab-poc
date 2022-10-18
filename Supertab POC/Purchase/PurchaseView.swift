@@ -12,7 +12,9 @@ struct PurchaseView: View {
     @ObservedObject var client: TapperClientMachine
     var title: String {
         switch(client.currentState) {
-        case .paymentRequired:
+        case .addingToTab:
+            return "..."
+        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
             return "Pay your Tab"
         case .itemAdded, .tabPaid:
             return "Thank you!"
@@ -124,27 +126,27 @@ struct PurchaseView: View {
             
             HStack(alignment: .center) {
                 TabIndicatorView(amount: tab?.amount ?? 0, projectedAmount: (tab?.amount ?? 0) + (client.context.selectedOffering?.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: client.currentState == .fetchingTab)
-                    .frame(width: 100, height: 120)
+                    .frame(width: 100, height: 130)
                     .padding(.leading)
                     .padding(.vertical)
                     .id("tabIndicator")
                 VStack(alignment: .leading) {
                     Text(.init(firstParagraph))
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.bottom, 1)
                         .id("firstParagraph")
-                        .transition(.scale)
                     Text(.init(secondParagraph))
+                        .fixedSize(horizontal: false, vertical: true)
                         .id("secondParagraph")
-                        .transition(.scale)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
+                .padding(10)
+                Spacer()
             }
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.systemBackground))
             .cornerRadius(10)
             .overlay(
-                RoundedRectangle(cornerRadius:10)
+                RoundedRectangle(cornerRadius: 10)
                     .stroke(Color.primary, lineWidth: 2)
                     .opacity(0.2)
                 
@@ -199,7 +201,8 @@ struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
         PurchaseView(
             defaultTitle: "Want to play another game?",
-            client: TapperClientMachine(offerings: defaultOfferings, selectedOffering: defaultOfferings[0])
+            client: TapperClientMachine(offerings: defaultOfferings, defaultOffering: defaultOfferings[0])
         )
+        .previewDevice(PreviewDevice(rawValue: "iPhone 11"))
     }
 }
