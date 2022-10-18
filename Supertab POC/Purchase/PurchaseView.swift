@@ -26,7 +26,7 @@ struct PurchaseView: View {
         switch client.currentState {
         case .fetchingTab:
             return ""
-        case .paymentRequired:
+        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
             return "You've completed your Tab."
         case .tabPaid:
             return "Your Tab has been paid."
@@ -42,7 +42,7 @@ struct PurchaseView: View {
         switch client.currentState {
         case .fetchingTab:
             return ""
-        case .paymentRequired:
+        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
             if let tab = client.context.tab {
                 return "Pay your **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** Tab to continue."
             }
@@ -126,21 +126,21 @@ struct PurchaseView: View {
             
             HStack(alignment: .center) {
                 TabIndicatorView(amount: tab?.amount ?? 0, projectedAmount: (tab?.amount ?? 0) + (client.context.selectedOffering?.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: client.currentState == .fetchingTab)
-                    .frame(width: 100, height: 130)
+                    .frame(width: 100, height: 120)
                     .padding(.leading)
                     .padding(.vertical)
                     .id("tabIndicator")
-                VStack(alignment: .leading) {
+                VStack(spacing: 10) {
                     Text(.init(firstParagraph))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.bottom, 1)
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .id("firstParagraph")
                     Text(.init(secondParagraph))
-                        .fixedSize(horizontal: false, vertical: true)
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .id("secondParagraph")
                 }
                 .padding(10)
-                Spacer()
             }
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.systemBackground))

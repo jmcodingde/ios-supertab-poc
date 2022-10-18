@@ -127,7 +127,21 @@ enum TapperClientGurads {
 }
 
 class TapperClientMachine: ObservableObject {
-    @Published private(set) var currentState: TapperClientState
+    @Published var shouldShowSheet = false {
+        didSet {
+            if !shouldShowSheet {
+                send(.dismiss)
+            }
+        }
+    }
+    @Published private(set) var currentState: TapperClientState {
+        didSet {
+            // Check if the value will change in order to avoid an infinite loop
+            if shouldShowSheet != (currentState != .idle) {
+                shouldShowSheet = currentState != .idle
+            }
+        }
+    }
     @Published private(set) var context: TapperClientContext
     
     init(offerings: [Offering], defaultOffering: Offering?) {

@@ -15,7 +15,6 @@ let defaultOfferings = [
 ]
 
 struct ContentView: View {
-    @State var showingTabSheet = false
     @State var tabSheetPresentationDetent = PresentationDetent.height(520)
     @ObservedObject var client = TapperClientMachine(offerings: defaultOfferings, defaultOffering: defaultOfferings[0])
     var body: some View {
@@ -43,7 +42,7 @@ struct ContentView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingTabSheet, onDismiss: {
+        .sheet(isPresented: $client.shouldShowSheet, onDismiss: {
             print("Purchase canceled")
             client.send(.dismiss)
         }) {
@@ -55,14 +54,6 @@ struct ContentView: View {
                 .presentationDetents([tabSheetPresentationDetent], selection: $tabSheetPresentationDetent)
                 .presentationDragIndicator(.visible)
         }
-        .onChange(of: client.currentState, perform: { _ in
-            switch client.currentState {
-            case .idle:
-                showingTabSheet = false
-            default:
-                showingTabSheet = true
-            }
-        })
     }
 }
 
