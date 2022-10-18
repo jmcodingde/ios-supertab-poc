@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 let initialMemoryGameState = MemoryGameState.awaitingFirstCardSelection
 
@@ -18,6 +19,7 @@ enum MemoryGameState: Equatable {
 
 enum MemoryGameEvent {
     case tapCard(MemoryGameCardMachine)
+    case addGames(_ numGames: Int)
     case reset
 }
 
@@ -81,6 +83,7 @@ struct MemoryGameContext {
     var numMismatchesLeft: Int
     let allowedNumMismatches: Int
     var cards: [MemoryGameCardMachine]
+    var gamesLeft: Int = 0
     init(numRows: Int, numCols: Int, faces: [String], allowedNumMismatches: Int) throws {
         self.numRows = numRows
         self.numCols = numCols
@@ -103,8 +106,16 @@ class MemoryGameMachine: ObservableObject {
     init() {
         context = try! MemoryGameContext(numRows: 5, numCols: 4, faces: faces, allowedNumMismatches: 10)
     }
-
+    
     func send(_ event: MemoryGameEvent) {
+        DispatchQueue.main.async {
+            withAnimation {
+                self._send(event)
+            }
+        }
+    }
+
+    private func _send(_ event: MemoryGameEvent) {
         print(currentState)
         switch(currentState, event) {
         case (.awaitingFirstCardSelection, .tapCard(let card)):
@@ -140,11 +151,18 @@ class MemoryGameMachine: ObservableObject {
                 print("Already matched")
             }
         case (_, .reset):
-            print("Resetting")
-            MemoryGameActions.resetAllCards(context)
-            context = MemoryGameActions.shuffleAllCards(context)
-            context = MemoryGameActions.resetNumMismatchesLeft(context)
-            currentState = initialMemoryGameState
+            if context.gamesLeft > 0 {
+                print("Resetting")
+                MemoryGameActions.resetAllCards(context)
+                context = MemoryGameActions.shuffleAllCards(context)
+                context = MemoryGameActions.resetNumMismatchesLeft(context)
+                context.gamesLeft -= 1
+                currentState = initialMemoryGameState
+            } else {
+                print("Cannot reset game because there are not games left")
+            }
+        case (_, .addGames(let numGames)):
+            context.gamesLeft += numGames
         default:
             print("Cannot handle event \(event) in state \(currentState)")
         }

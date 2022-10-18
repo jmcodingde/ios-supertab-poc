@@ -7,9 +7,29 @@
 
 import SwiftUI
 
+let memoryGameViewOfferings = [
+    Offering(50, 1, "1 game"),
+    Offering(100, 2, "2 games"),
+    Offering(200, 5, "5 games")
+]
+
 struct MemoryGameView: View {
-    @ObservedObject var game = MemoryGameMachine()
-    @State var showingResetConfirmationAlert = false;
+    @ObservedObject var client: TapperClientMachine
+    @ObservedObject var game: MemoryGameMachine
+    
+    init() {
+        let game = MemoryGameMachine()
+        self.game = game
+        client = TapperClientMachine(
+            offerings: memoryGameViewOfferings,
+            defaultOffering: memoryGameViewOfferings[0],
+            onAddedToTab: { offering in
+                game.send(.addGames(offering.numGames))
+                game.send(.reset)
+            }
+        )
+    }
+    
     var body: some View {
         VStack {
             Spacer()
@@ -37,25 +57,28 @@ struct MemoryGameView: View {
             }
             Spacer()
             Button {
-                if game.currentState == .won || game.currentState == .lost {
+                if game.context.gamesLeft > 0 {
                     game.send(.reset)
                 } else {
-                    showingResetConfirmationAlert = true
+                    client.send(.startPurchase)
                 }
             } label: {
-                Text("Start new game")
+                Text("Start new game" + (game.context.gamesLeft > 0 ? " (\(game.context.gamesLeft) left)" : ""))
             }
             Spacer()
         }
         .padding()
-        .alert(isPresented: $showingResetConfirmationAlert) {
-            Alert(
-                title: Text("Do you want to start a new game?"),
-                primaryButton: .destructive(Text("Start a new game")) {
-                    game.send(.reset)
-                },
-                secondaryButton: .cancel()
+        .sheet(isPresented: $client.shouldShowSheet, onDismiss: {
+            print("Purchase canceled")
+            client.send(.dismiss)
+        }) {
+            PurchaseView(
+                defaultTitle: "Want to play another game?",
+                client: client
             )
+                .padding(.top, 10)
+                .presentationDetents([.height(520)])
+                .presentationDragIndicator(.visible)
         }
     }
 }

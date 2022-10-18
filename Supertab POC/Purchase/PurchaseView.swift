@@ -205,7 +205,7 @@ struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
         PurchaseView(
             defaultTitle: "Want to play another game?",
-            client: TapperClientMachine(offerings: defaultOfferings, defaultOffering: defaultOfferings[0])
+            client: TapperClientMachine(offerings: memoryGameViewOfferings, defaultOffering: memoryGameViewOfferings[0])
         )
         .previewDevice(PreviewDevice(rawValue: "iPhone 11"))
     }

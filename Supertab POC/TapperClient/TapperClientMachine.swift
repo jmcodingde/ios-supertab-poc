@@ -73,7 +73,7 @@ enum TapperClientEvent: Equatable {
     case fetchTabError(_ message: String)
     case selectOffering(_ offering: Offering)
     case addToTab(_ offering: Offering)
-    case addToTabDone(_ tab: Tab)
+    case addToTabDone(offering: Offering, tab: Tab)
     case addToTabError(_ message: String)
     case startPayment
     case fetchPaymentDetailsDone
@@ -102,7 +102,7 @@ enum TapperClientServices {
                 }
                 newTab.amount += offering.amount
                 globalTab = newTab
-                send(.addToTabDone(newTab))
+                send(.addToTabDone(offering: offering, tab: newTab))
             default:
                 send(.addToTabError("Event not supported: \(event)"))
             }
@@ -143,10 +143,12 @@ class TapperClientMachine: ObservableObject {
         }
     }
     @Published private(set) var context: TapperClientContext
+    let onAddedToTab: ((_ offering: Offering) -> Void)?
     
-    init(offerings: [Offering], defaultOffering: Offering?) {
+    init(offerings: [Offering], defaultOffering: Offering?, onAddedToTab: ((_ offering: Offering) -> Void)? = nil) {
         currentState = tapperClientInitialState
         context = TapperClientContext(offerings: offerings, defaultOffering: defaultOffering)
+        self.onAddedToTab = onAddedToTab
     }
     
     func isTabFull() -> Bool {
@@ -183,12 +185,13 @@ class TapperClientMachine: ObservableObject {
         case (.showingOfferings, .addToTab):
             currentState = .addingToTab
             TapperClientServices.addToTab(send, context, event)
-        case (.addingToTab, .addToTabDone(let tab)):
+        case (.addingToTab, .addToTabDone(let offering, let tab)):
             context.tab = tab
             context.selectedOffering = nil
             currentState = isTabFull()
             ? .paymentRequired
             : .itemAdded
+            onAddedToTab?(offering)
         case (.paymentRequired, .startPayment):
             currentState = .fetchingPaymentDetails
             TapperClientServices.fetchPaymentDetails(send)
