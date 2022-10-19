@@ -37,14 +37,6 @@ class MemoryGameCardMachine: ObservableObject {
     }
     
     func send(_ event: MemoryGameCardEvent) {
-        DispatchQueue.main.async {
-            withAnimation {
-                self._send(event)
-            }
-        }
-    }
-    
-    private func _send(_ event: MemoryGameCardEvent) {
         switch(currentState, event) {
         case (.cover, .show):
             print("Showing \(context.face)")

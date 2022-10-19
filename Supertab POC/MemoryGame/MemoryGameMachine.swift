@@ -84,6 +84,9 @@ struct MemoryGameContext {
     let allowedNumMismatches: Int
     var cards: [MemoryGameCardMachine]
     var gamesLeft: Int = 0
+    var isDirty: Bool {
+        return cards.contains { card in card.currentState != .cover }
+    }
     init(numRows: Int, numCols: Int, faces: [String], allowedNumMismatches: Int) throws {
         self.numRows = numRows
         self.numCols = numCols
@@ -106,16 +109,8 @@ class MemoryGameMachine: ObservableObject {
     init() {
         context = try! MemoryGameContext(numRows: 5, numCols: 4, faces: faces, allowedNumMismatches: 10)
     }
-    
-    func send(_ event: MemoryGameEvent) {
-        DispatchQueue.main.async {
-            withAnimation {
-                self._send(event)
-            }
-        }
-    }
 
-    private func _send(_ event: MemoryGameEvent) {
+    func send(_ event: MemoryGameEvent) {
         print(currentState)
         switch(currentState, event) {
         case (.awaitingFirstCardSelection, .tapCard(let card)):
@@ -126,6 +121,7 @@ class MemoryGameMachine: ObservableObject {
             switch(card.currentState) {
             case .cover:
                 card.send(.show)
+                
                 if MemoryGameGuards.isMatch(context) {
                     MemoryGameActions.markMatch(context)
                     if MemoryGameGuards.hasWon(context) {

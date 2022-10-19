@@ -63,13 +63,13 @@ struct MemoryGameView: View {
                     client.send(.startPurchase)
                 }
             } label: {
-                Text("Start new game" + (game.context.gamesLeft > 0 ? " (\(game.context.gamesLeft) left)" : ""))
+                Text("Start a new game" + (game.context.gamesLeft > 0 ? " (\(game.context.gamesLeft) left)" : ""))
             }
+            .disabled(!game.context.isDirty)
             Spacer()
         }
         .padding()
         .sheet(isPresented: $client.shouldShowSheet, onDismiss: {
-            print("Purchase canceled")
             client.send(.dismiss)
         }) {
             PurchaseView(

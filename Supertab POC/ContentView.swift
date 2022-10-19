@@ -12,11 +12,12 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             List {
-                VStack(alignment: .leading) {
+                VStack(alignment: .center) {
                     SupertabLogo()
                         .frame(height: 40)
                         .padding(.vertical)
                 }
+                .frame(maxWidth: .infinity)
                 NavigationLink(destination: {
                     MemoryGameView()
                         .padding()
