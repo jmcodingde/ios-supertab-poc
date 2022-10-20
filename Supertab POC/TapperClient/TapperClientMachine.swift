@@ -8,38 +8,46 @@
 import Foundation
 import SwiftUI
 
-struct Tab: Equatable {
-    var amount: Int
-    var limit: Int
-    var currency: String
+struct CurrentTabResponse: Codable, Equatable {
+    let total: Int
+    let limit: Int
+    let id: String
+    let currency: String
     var isFull: Bool {
-        amount >= limit
+        total >= limit
     }
     static let defaultLimit = 500
-    static let defaultCurrency  = "usd"
-    init(amount: Int, limit: Int, currency: String) {
-        self.amount = amount
-        self.limit = limit
-        self.currency = currency
-    }
-    init() {
-        self.amount = 0
-        self.limit = Tab.defaultLimit
-        self.currency = Tab.defaultCurrency
-    }
+    static let defaultCurrency  = "USD"
+}
+
+typealias Tab = CurrentTabResponse
+
+struct PurchaseResponse: Codable {
+    var itemAdded: Bool
+    var paymentItentId: String?
+    var tab: CurrentTabResponse
+}
+
+struct StartPaymentResponse: Codable {
+    var clientSecret: String
+    var publishableKey: String
+    var userToken: String
 }
 
 var globalTab: Tab?
 
-struct Offering: Hashable {
+struct Offering: Hashable, Codable {
+    let offeringId: String
+    let summary: String
+    let price: Price
+    let paymentModel: String
+    let salesModel: String
+    let metadata: [String: Int]?
+}
+
+struct Price: Hashable, Codable {
     let amount: Int
-    let numGames: Int
-    let description: String
-    init(_ amount: Int, _ numGames: Int, _ description: String) {
-        self.amount = amount
-        self.numGames = numGames
-        self.description = description
-    }
+    let currency: String
 }
 
 enum TapperClientState: Equatable {
@@ -64,6 +72,7 @@ struct TapperClientContext {
     var selectedOffering: Offering?
     var tab: Tab?
     var errorMessage: String?
+    let apiRoot = "https://ios.poc.laterpay.net/api/laterpay"
 }
 
 enum TapperClientEvent: Equatable {
@@ -82,30 +91,72 @@ enum TapperClientEvent: Equatable {
     case confirmPaymentWithApplePay
     case confirmPaymentWithApplePayDone
     case confirmPaymentWithApplePayError(_ message: String)
+    case genericError(_ message: String)
 }
 
 enum TapperClientServices {
-    static func fetchTab(_ send: @escaping (TapperClientEvent) -> Void) {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+    static let session = URLSession.shared
+    static let decoder = JSONDecoder()
+    static let encoder = JSONEncoder()
+    static func fetchTab(_ send: @escaping (TapperClientEvent) -> Void, _ context: TapperClientContext) {
+        /*Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
             send(.fetchTabDone(globalTab))
+        }*/
+        Task.detached {
+            do {
+                let url = URL(string: "\(context.apiRoot)/current_tab")!
+                print("Fetching data from \(url)")
+                let (data, rawResponse) = try await session.data(from: url)
+                let response = rawResponse as! HTTPURLResponse
+                print("Response status code: \(response.statusCode)")
+                switch response.statusCode {
+                case 200:
+                    let tab = try! decoder.decode(CurrentTabResponse.self, from: data)
+                    print("Received tab")
+                    print(tab)
+                    send(.fetchTabDone(tab))
+                case 204:
+                    print("User has no tab")
+                    send(.fetchTabDone(nil))
+                default:
+                    print("Cannot handle response with status code \(response.statusCode)")
+                }
+            } catch(let error) {
+                send(.fetchTabError(error.localizedDescription))
+            }
         }
     }
     static func addToTab(_ send: @escaping (TapperClientEvent) -> Void, _ context: TapperClientContext, _ event: TapperClientEvent) {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-            switch(event) {
-            case .addToTab(let offering):
-                var newTab: Tab
-                if let tab = context.tab {
-                    newTab = tab
-                } else {
-                    newTab = Tab()
+        switch(event) {
+        case .addToTab(let offering):
+            print("Adding to tab...")
+            print(offering)
+            
+            Task.detached {
+                let url = URL(string: "\(context.apiRoot)/purchase")!
+                var request = URLRequest(url: url)
+                request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+                let bodyData = try! encoder.encode(offering)
+                request.httpMethod = "POST"
+                request.httpBody = bodyData
+                print("Will send request with body:", String(data: request.httpBody!, encoding: .utf8)!)
+                print("Will send request with headers:", request.allHTTPHeaderFields as Any)
+                
+                let (data, rawResponse) = try await session.data(for: request)
+                let response = rawResponse as! HTTPURLResponse
+                print("Response status code: \(response.statusCode)")
+                switch response.statusCode {
+                case 201, 402:
+                    let result = try! decoder.decode(PurchaseResponse.self, from: data)
+                    print(result)
+                    send(.addToTabDone(offering: offering, tab: result.tab))
+                default:
+                    print("Cannot handle response with status code \(response.statusCode)")
+                    print(response)
                 }
-                newTab.amount += offering.amount
-                globalTab = newTab
-                send(.addToTabDone(offering: offering, tab: newTab))
-            default:
-                send(.addToTabError("Event not supported: \(event)"))
             }
+        default:
+            send(.addToTabError("Event not supported: \(event)"))
         }
     }
     static func fetchPaymentDetails(_ send: @escaping (TapperClientEvent) -> Void) {
@@ -174,7 +225,7 @@ class TapperClientMachine: ObservableObject {
         case (.idle, .startPurchase):
             context.selectedOffering = context.defaultOffering
             currentState = .fetchingTab
-            TapperClientServices.fetchTab(send)
+            TapperClientServices.fetchTab(send, context)
         case (.fetchingTab, .fetchTabDone(let tab)):
             context.tab = tab
             currentState = isTabFull()
@@ -208,7 +259,8 @@ class TapperClientMachine: ObservableObject {
             (.fetchingTab, .fetchTabError(let message)),
             (.addingToTab, .addToTabError(let message)),
             (.fetchingPaymentDetails, .fetchPaymentDetailsError(let message)),
-            (.confirmingPayment, .confirmPaymentWithApplePayError(let message)):
+            (.confirmingPayment, .confirmPaymentWithApplePayError(let message)),
+            (_, .genericError(let message)):
             context.errorMessage = message
             currentState = .error
         default:

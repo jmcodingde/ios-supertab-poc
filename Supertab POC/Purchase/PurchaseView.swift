@@ -32,7 +32,7 @@ struct PurchaseView: View {
             return "Your Tab has been paid."
         default:
             if let tab = client.context.tab {
-                return "You've used **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
+                return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
             } else {
                 return "The Tab makes it easy for you to buy only what you want."
             }
@@ -44,7 +44,7 @@ struct PurchaseView: View {
             return ""
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
             if let tab = client.context.tab {
-                return "Pay your **\(formattedPrice(amount: tab.amount, currencyCode: tab.currency))** Tab to continue."
+                return "Pay your **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** Tab to continue."
             }
         case .tabPaid:
             return "You've used **\(formattedPrice(amount: 0, currencyCode: Tab.defaultCurrency))** of your new **\(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))** Tab."
@@ -75,10 +75,10 @@ struct PurchaseView: View {
                             client.send(.selectOffering(offering))
                         } label: {
                             VStack {
-                                Text("$\(String(format: "%.2f", Float(offering.amount)/100.00))")
+                                Text("$\(String(format: "%.2f", Float(offering.price.amount)/100.00))")
                                     .bold()
                                     .font(.headline)
-                                Text(offering.description)
+                                Text(offering.summary)
                                     .font(.subheadline)
                             }
                             .padding()
@@ -129,7 +129,7 @@ struct PurchaseView: View {
             }
             
             HStack(alignment: .center) {
-                TabIndicatorView(amount: tab?.amount ?? 0, projectedAmount: (tab?.amount ?? 0) + (client.context.selectedOffering?.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: client.currentState == .fetchingTab)
+                TabIndicatorView(amount: tab?.total ?? 0, projectedAmount: (tab?.total ?? 0) + (client.context.selectedOffering?.price.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: client.currentState == .fetchingTab)
                     .frame(width: 100, height: 120)
                     .padding(.leading)
                     .padding(.vertical)
