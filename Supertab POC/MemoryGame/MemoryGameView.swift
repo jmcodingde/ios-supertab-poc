@@ -52,12 +52,15 @@ struct MemoryGameView: View {
                             print("\nTapped card #\(currentIndex)")
                             game.send(.tapCard(card))
                         }
+                        .disabled(card.currentState != .cover)
                     }
                 }
+                .disabled(game.currentState == .lost)
+                .opacity(game.currentState == .lost ? 0.5 : 1)
             }
             Spacer()
             Button {
-                if game.context.gamesLeft > 0 {
+                if game.context.gamesLeft > 0 || game.currentState == .won {
                     game.send(.reset)
                 } else {
                     client.send(.startPurchase)

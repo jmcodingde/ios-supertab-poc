@@ -146,6 +146,11 @@ class MemoryGameMachine: ObservableObject {
             case .matched:
                 print("Already matched")
             }
+        case (.won ,.reset):
+            MemoryGameActions.resetAllCards(context)
+            context = MemoryGameActions.shuffleAllCards(context)
+            context = MemoryGameActions.resetNumMismatchesLeft(context)
+            currentState = initialMemoryGameState
         case (_, .reset):
             if context.gamesLeft > 0 {
                 print("Resetting")
