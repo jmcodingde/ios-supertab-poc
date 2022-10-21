@@ -14,7 +14,7 @@ struct PurchaseView: View {
         switch(client.currentState) {
         case .addingToTab:
             return "..."
-        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
+        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
             return "Pay your Tab"
         case .itemAdded, .tabPaid:
             return "Thank you!"
@@ -26,7 +26,7 @@ struct PurchaseView: View {
         switch client.currentState {
         case .fetchingTab:
             return ""
-        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
+        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
             return "You've completed your Tab."
         case .tabPaid:
             return "Your Tab has been paid."
@@ -42,7 +42,7 @@ struct PurchaseView: View {
         switch client.currentState {
         case .fetchingTab:
             return ""
-        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .confirmingPayment:
+        case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
             if let tab = client.context.tab {
                 return "Pay your **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** Tab to continue."
             }
@@ -139,10 +139,12 @@ struct PurchaseView: View {
                         .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .id("firstParagraph")
+                        .transition(.scale)
                     Text(.init(secondParagraph))
                         .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .id("secondParagraph")
+                        .transition(.scale)
                 }
                 .padding(10)
             }
@@ -157,10 +159,11 @@ struct PurchaseView: View {
             )
             .padding(.horizontal)
             .padding(.bottom)
+            .zIndex(1)
             
-            if client.currentState == .paymentRequired {
+            if [.paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet].contains(client.currentState) {
                 Button {
-                    client.send(.startPayment)
+                    client.send(.showApplePayPaymentSheet)
                 } label: {
                     Text("")
                 }
@@ -169,6 +172,8 @@ struct PurchaseView: View {
                 .cornerRadius(.infinity)
                 .padding(.horizontal)
                 .padding(.bottom)
+                .disabled(client.currentState != .paymentRequired)
+                .opacity(client.currentState == .paymentRequired ? 1 : 0.5)
             }
             
             Spacer()

@@ -29,7 +29,7 @@ struct TabIndicatorView: View {
                 .foregroundColor(Color.primary)
                 .opacity(0.5)
                 .id("Price")
-                //.transition(.scale) // TODO: find out why this is necessary
+                .transition(.scale) // TODO: find out why this is necessary
             Arc(startAngle: gap / 2, endAngle: -gap / 2, clockwise: true, rotationAdjustment: Angle.degrees(270.0))
                 .strokeBorder(Color.primary, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .opacity(0.15)

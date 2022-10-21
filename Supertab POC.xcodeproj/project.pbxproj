@@ -20,6 +20,8 @@
 		DFD9801E28F98DBC00A58D6E /* MemoryGameCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9801D28F98DBC00A58D6E /* MemoryGameCardView.swift */; };
 		DFD9802028F9913200A58D6E /* MemoryGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9801F28F9913200A58D6E /* MemoryGameView.swift */; };
 		DFD9802428FC566600A58D6E /* PurchaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD9802328FC566600A58D6E /* PurchaseView.swift */; };
+		DFF0382C2901ADC300C8BD0A /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = DFF0382B2901ADC300C8BD0A /* Stripe */; };
+		DFF0382E2901ADD300C8BD0A /* StripeApplePayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF0382D2901ADD300C8BD0A /* StripeApplePayModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +39,8 @@
 		DFD9801D28F98DBC00A58D6E /* MemoryGameCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameCardView.swift; sourceTree = "<group>"; };
 		DFD9801F28F9913200A58D6E /* MemoryGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameView.swift; sourceTree = "<group>"; };
 		DFD9802328FC566600A58D6E /* PurchaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseView.swift; sourceTree = "<group>"; };
+		DFF0382D2901ADD300C8BD0A /* StripeApplePayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripeApplePayModel.swift; sourceTree = "<group>"; };
+		DFF0382F2901B33B00C8BD0A /* Supertab POC.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Supertab POC.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DFF0382C2901ADC300C8BD0A /* Stripe in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				DF66B0AA28FEA79000ABAC6C /* TapperClientMachine.swift */,
+				DFF0382D2901ADD300C8BD0A /* StripeApplePayModel.swift */,
 			);
 			path = TapperClient;
 			sourceTree = "<group>";
@@ -87,6 +93,7 @@
 		DFC9FAE928F704B400CBDFA7 /* Supertab POC */ = {
 			isa = PBXGroup;
 			children = (
+				DFF0382F2901B33B00C8BD0A /* Supertab POC.entitlements */,
 				DF66B0A928FEA76400ABAC6C /* TapperClient */,
 				DF40B3A328FD4BF800F754AD /* Shared */,
 				DFD9802228FC560E00A58D6E /* Purchase */,
@@ -142,6 +149,9 @@
 			dependencies = (
 			);
 			name = "Supertab POC";
+			packageProductDependencies = (
+				DFF0382B2901ADC300C8BD0A /* Stripe */,
+			);
 			productName = "Supertab POC";
 			productReference = DFC9FAE728F704B400CBDFA7 /* Supertab POC.app */;
 			productType = "com.apple.product-type.application";
@@ -170,6 +180,9 @@
 				Base,
 			);
 			mainGroup = DFC9FADE28F704B400CBDFA7;
+			packageReferences = (
+				DFF0382A2901ADC300C8BD0A /* XCRemoteSwiftPackageReference "stripe-ios" */,
+			);
 			productRefGroup = DFC9FAE828F704B400CBDFA7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -200,6 +213,7 @@
 				DFD9802428FC566600A58D6E /* PurchaseView.swift in Sources */,
 				DFD9801C28F965E400A58D6E /* MemoryGameMachine.swift in Sources */,
 				DF66B0A828FDB98F00ABAC6C /* ApplePayButton.swift in Sources */,
+				DFF0382E2901ADD300C8BD0A /* StripeApplePayModel.swift in Sources */,
 				DF40B3A228FD4B2F00F754AD /* SupertabLogo.swift in Sources */,
 				DFD9802028F9913200A58D6E /* MemoryGameView.swift in Sources */,
 				DFC9FAED28F704B400CBDFA7 /* ContentView.swift in Sources */,
@@ -332,6 +346,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Supertab POC/Supertab POC.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Supertab POC/Preview Content\"";
@@ -363,6 +378,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Supertab POC/Supertab POC.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Supertab POC/Preview Content\"";
@@ -411,6 +427,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DFF0382A2901ADC300C8BD0A /* XCRemoteSwiftPackageReference "stripe-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stripe/stripe-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 22.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DFF0382B2901ADC300C8BD0A /* Stripe */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DFF0382A2901ADC300C8BD0A /* XCRemoteSwiftPackageReference "stripe-ios" */;
+			productName = Stripe;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DFC9FADF28F704B400CBDFA7 /* Project object */;
 }
