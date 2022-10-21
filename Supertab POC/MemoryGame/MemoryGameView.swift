@@ -8,7 +8,7 @@
 import SwiftUI
 
 let memoryGameViewOfferings = [
-    Offering(offeringId: "memoryGame.1-game", summary: "1 game", price: Price(amount: 500, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 1]),
+    Offering(offeringId: "memoryGame.1-game", summary: "1 game", price: Price(amount: 50, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 1]),
     Offering(offeringId: "memoryGame.2-games", summary: "2 games", price: Price(amount: 100, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 2]),
     Offering(offeringId: "memoryGame.5-game2", summary: "5 games", price: Price(amount: 200, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 5])
 ]

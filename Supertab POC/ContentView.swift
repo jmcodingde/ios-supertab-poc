@@ -14,7 +14,7 @@ struct ContentView: View {
             List {
                 VStack(alignment: .center) {
                     SupertabLogo()
-                        .frame(height: 40)
+                        .frame(height: 50)
                         .padding(.vertical)
                 }
                 .frame(maxWidth: .infinity)
