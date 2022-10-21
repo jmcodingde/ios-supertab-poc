@@ -160,7 +160,7 @@ class MemoryGameMachine: ObservableObject {
                 context.gamesLeft -= 1
                 currentState = initialMemoryGameState
             } else {
-                print("Cannot reset game because there are not games left")
+                print("Cannot reset game because there are no games left")
             }
         case (_, .addGames(let numGames)):
             context.gamesLeft += numGames
