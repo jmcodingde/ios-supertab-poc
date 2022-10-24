@@ -83,11 +83,11 @@ struct MemoryGameContext {
     var numMismatchesLeft: Int
     let allowedNumMismatches: Int
     var cards: [MemoryGameCardMachine]
-    var gamesLeft: Int = 0
+    var gamesLeft: Int
     var isDirty: Bool {
         return cards.contains { card in card.currentState != .cover }
     }
-    init(numRows: Int, numCols: Int, faces: [String], allowedNumMismatches: Int) throws {
+    init(numRows: Int, numCols: Int, faces: [String], allowedNumMismatches: Int, gamesLeft: Int) throws {
         self.numRows = numRows
         self.numCols = numCols
         self.numMismatchesLeft = allowedNumMismatches
@@ -98,6 +98,7 @@ struct MemoryGameContext {
         self.cards = (faces + faces).map({ face in
             MemoryGameCardMachine(face: face)
         }).shuffled()
+        self.gamesLeft = gamesLeft
     }
 }
 
@@ -106,8 +107,8 @@ class MemoryGameMachine: ObservableObject {
     @Published private(set) var currentState = initialMemoryGameState
     @Published private(set) var context: MemoryGameContext
     
-    init() {
-        context = try! MemoryGameContext(numRows: 5, numCols: 4, faces: faces, allowedNumMismatches: 10)
+    init(numGames: Int = -1) {
+        context = try! MemoryGameContext(numRows: 5, numCols: 4, faces: faces, allowedNumMismatches: 10, gamesLeft: numGames)
     }
 
     func send(_ event: MemoryGameEvent) {
@@ -152,13 +153,19 @@ class MemoryGameMachine: ObservableObject {
             context = MemoryGameActions.resetNumMismatchesLeft(context)
             currentState = initialMemoryGameState
         case (_, .reset):
-            if context.gamesLeft > 0 {
-                print("Resetting")
+            func reset() {
                 MemoryGameActions.resetAllCards(context)
                 context = MemoryGameActions.shuffleAllCards(context)
                 context = MemoryGameActions.resetNumMismatchesLeft(context)
-                context.gamesLeft -= 1
                 currentState = initialMemoryGameState
+            }
+            if context.gamesLeft == -1 {
+                print("Resetting (not counting games)")
+                reset()
+            } else if context.gamesLeft > 0 {
+                print("Resetting (games left: \(context.gamesLeft)")
+                context.gamesLeft -= 1
+                reset()
             } else {
                 print("Cannot reset game because there are no games left")
             }

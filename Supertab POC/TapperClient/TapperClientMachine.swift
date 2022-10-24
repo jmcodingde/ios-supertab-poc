@@ -44,6 +44,7 @@ struct Offering: Hashable, Codable {
     let paymentModel: String
     let salesModel: String
     let metadata: [String: Int]?
+    let validTimedelta: String?
 }
 
 struct Price: Hashable, Codable {

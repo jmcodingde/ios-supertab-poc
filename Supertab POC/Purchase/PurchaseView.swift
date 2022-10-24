@@ -206,11 +206,17 @@ struct PurchaseView: View {
     }
 }
 
+let exampleOfferings = [
+    Offering(offeringId: "memoryGame.1-game", summary: "1 game", price: Price(amount: 50, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 1], validTimedelta: nil),
+    Offering(offeringId: "memoryGame.2-games", summary: "2 games", price: Price(amount: 100, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 2], validTimedelta: nil),
+    Offering(offeringId: "memoryGame.5-game2", summary: "5 games", price: Price(amount: 200, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 5], validTimedelta: nil)
+]
+
 struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
         PurchaseView(
             defaultTitle: "Want to play another game?",
-            client: TapperClientMachine(offerings: memoryGameViewOfferings, defaultOffering: memoryGameViewOfferings[0])
+            client: TapperClientMachine(offerings: exampleOfferings, defaultOffering: exampleOfferings[0])
         )
         .previewDevice(PreviewDevice(rawValue: "iPhone 11"))
     }

@@ -19,7 +19,14 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity)
                 NavigationLink(destination: {
-                    MemoryGameView()
+                    PayPerGameView()
+                        .padding()
+                        .navigationTitle("Pay per Game")
+                }) {
+                    Text("Pay per Game")
+                }
+                NavigationLink(destination: {
+                    PayForAccessView()
                         .padding()
                         .navigationTitle("Pay for Access")
                 }) {
