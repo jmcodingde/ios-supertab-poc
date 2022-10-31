@@ -8,6 +8,38 @@
 import Foundation
 import SwiftUI
 import Stripe
+import Combine
+
+struct AccessResponse: Codable, Equatable {
+    let access: AccessDetail
+    var error: AccessError? = nil
+}
+
+struct AccessDetail: Codable, Equatable {
+    let hasAccess: Bool
+    let reason: String
+    let salesModel: String
+    let validFrom: Date?
+    let validTo: Date?
+}
+
+struct AccessError: Codable, Equatable {
+    let message: String
+    let code: String
+}
+
+struct Purchase: Codable, Equatable {
+    let id: String
+    let purchaseDate: String
+    let offeringId: String
+    let summary: String
+    let price: Price
+    let paymentModel: String
+    let salesModel: String
+    let metadata: [String: String]?
+    let validTimedelta: String?
+    let validTo: Date?
+}
 
 struct CurrentTabResponse: Codable, Equatable {
     let total: Int
@@ -19,6 +51,7 @@ struct CurrentTabResponse: Codable, Equatable {
     }
     static let defaultLimit = 500
     static let defaultCurrency  = "USD"
+    let purchases: [Purchase]
 }
 
 typealias Tab = CurrentTabResponse
@@ -43,8 +76,9 @@ struct Offering: Hashable, Codable {
     let price: Price
     let paymentModel: String
     let salesModel: String
-    let metadata: [String: Int]?
-    let validTimedelta: String?
+    var metadata: [String: Int]? = nil
+    var validTimedelta: String? = nil
+    var validTo: String? = nil
 }
 
 struct Price: Hashable, Codable {
@@ -71,11 +105,17 @@ struct TapperClientContext {
     var offerings: [Offering]
     var defaultOffering: Offering?
     var selectedOffering: Offering?
+    var lastItemAddedToTab: Offering?
     var tab: Tab?
     var errorMessage: String?
-    let apiRoot = "https://ios.poc.laterpay.net/api/laterpay"
+    //let apiRoot = "https://ios.poc.laterpay.net/api/laterpay"
+    //let apiRoot = "https://c570-62-226-109-193.ngrok.io/api/laterpay"
+    //let apiRoot = "http://192.168.1.100:4200/api/laterpay"
+    let apiRoot = "https://deploy-preview-66--poc-ios.netlify.app/api/laterpay"
     var paymentDetails: PaymentDetails? = nil
     let stripeApplePay = StripeApplePayModel()
+    var accessValidTo: Date? = nil
+    var isCheckingAccess = false
 }
 
 enum TapperClientEvent: Equatable {
@@ -94,11 +134,18 @@ enum TapperClientEvent: Equatable {
     case applePayDone
     case applePayError(_ message: String)
     case genericError(_ message: String)
+    case checkAccess
+    case checkAccessDone(validTo: Date?)
+    case checkAccessError(_ message: String)
 }
 
 enum TapperClientServices {
     static let session = URLSession.shared
-    static let decoder = JSONDecoder()
+    static var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }
     static let encoder = JSONEncoder()
     static func fetchTab(_ send: @escaping (TapperClientEvent) -> Void, _ context: TapperClientContext) {
         Task.detached {
@@ -118,7 +165,7 @@ enum TapperClientServices {
                     print("User has no tab")
                     send(.fetchTabDone(nil))
                 default:
-                    print("Cannot handle response with status code \(response.statusCode)")
+                    send(.fetchTabError("Cannot handle response with status code \(response.statusCode), response: \(response)"))
                 }
             } catch(let error) {
                 send(.fetchTabError(error.localizedDescription))
@@ -146,12 +193,12 @@ enum TapperClientServices {
                 print("Response status code: \(response.statusCode)")
                 switch response.statusCode {
                 case 201, 402:
+                    //print(String(decoding: data, as: UTF8.self))
                     let result = try! decoder.decode(PurchaseResponse.self, from: data)
                     print(result)
                     send(.addToTabDone(offering: offering, tab: result.tab, itemAdded: result.itemAdded))
                 default:
-                    print("Cannot handle response with status code \(response.statusCode)")
-                    print(response)
+                    send(.addToTabError("Cannot handle response with status code \(response.statusCode), response: \(response)"))
                 }
             }
         default:
@@ -213,6 +260,38 @@ enum TapperClientServices {
         }
         
     }
+    static func checkAccess(_ send: @escaping (TapperClientEvent) -> Void, _ context: TapperClientContext) {
+        @Sendable func checkAccessForSingle(offeringId: String) async throws -> AccessResponse{
+            let url = URL(string: "\(context.apiRoot)/access?offering_id=\(offeringId)")!
+            let request = URLRequest(url: url)
+            let (data, rawResponse) = try! await URLSession.shared.data(for: request, delegate: nil)
+            let response = rawResponse as! HTTPURLResponse
+            if ![200, 404].contains(response.statusCode) {
+                throw "Unexpected response status code when checking access: \(response.statusCode)"
+            }
+            let accessReponse = try! decoder.decode(AccessResponse.self, from: data)
+            //print("Received access response for offering id \(offeringId)")
+            return accessReponse
+        }
+        print("Checking access")
+        Task {
+            do {
+                let accessResponses = try await context.offerings
+                    .map { $0.offeringId }
+                    .concurrentMap { offeringId in
+                        try await checkAccessForSingle(offeringId: offeringId)
+                    }
+                let validTo = accessResponses
+                    .filter { $0.access.hasAccess }
+                    .sorted { $0.access.validTo! > $1.access.validTo! }
+                    .first?.access.validTo
+                print("Received all access reponses: \(accessResponses)")
+                send(.checkAccessDone(validTo: validTo))
+            } catch(let error) {
+                send(.checkAccessError(error.localizedDescription))
+            }
+        }
+    }
 }
 
 enum TapperClientActions {
@@ -244,6 +323,7 @@ class TapperClientMachine: ObservableObject {
         currentState = tapperClientInitialState
         context = TapperClientContext(offerings: offerings, defaultOffering: defaultOffering)
         self.onAddedToTab = onAddedToTab
+        send(.checkAccess)
     }
     
     func isTabFull() -> Bool {
@@ -293,7 +373,9 @@ class TapperClientMachine: ObservableObject {
                 currentState = .itemAdded
             }
             if itemAdded {
+                context.lastItemAddedToTab = offering
                 onAddedToTab?(offering)
+                send(.checkAccess)
             }
         case (.fetchingPaymentDetails, .fetchPaymentDetailsDone(let paymentDetails)):
             context.paymentDetails = paymentDetails
@@ -307,8 +389,14 @@ class TapperClientMachine: ObservableObject {
             context.tab = nil
             context.selectedOffering = nil
             currentState = .tabPaid
+            send(.checkAccess)
         case (_, .dismiss):
             currentState = .idle
+        case
+            (_, .checkAccessError(let message)):
+            context.isCheckingAccess = false
+            context.errorMessage = message
+            currentState = .error
         case
             (.fetchingTab, .fetchTabError(let message)),
             (.addingToTab, .addToTabError(let message)),
@@ -317,6 +405,14 @@ class TapperClientMachine: ObservableObject {
             (_, .genericError(let message)):
             context.errorMessage = message
             currentState = .error
+        case (_, .checkAccess):
+            if !context.isCheckingAccess {
+                context.isCheckingAccess = true
+                TapperClientServices.checkAccess(send, context)
+            }
+        case (_, .checkAccessDone(let validTo)):
+            context.isCheckingAccess = false
+            context.accessValidTo = validTo
         default:
             print("Cannot handle event \(event) in state \(currentState)")
         }
