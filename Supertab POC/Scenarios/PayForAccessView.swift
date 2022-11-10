@@ -20,7 +20,7 @@ struct PayForAccessView: View {
     )
     @ObservedObject var game = MemoryGameMachine()
     @State var timer = Timer.publish(every: 1, tolerance: 200, on: .main, in: .common).autoconnect()
-    @State var secondsLeft: Int = 10
+    @State var secondsLeft: Int = 30
     var outOfTime: Bool {
         secondsLeft <= 0
     }
@@ -83,6 +83,9 @@ struct PayForAccessView: View {
         }
         .onReceive(timer) { _ in
             updateSecondsLeft()
+        }
+        .onAppear {
+            client.send(.checkAccess)
         }
     }
 }

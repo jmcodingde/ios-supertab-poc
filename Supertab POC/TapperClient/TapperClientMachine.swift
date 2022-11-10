@@ -111,7 +111,8 @@ struct TapperClientContext {
     //let apiRoot = "https://ios.poc.laterpay.net/api/laterpay"
     //let apiRoot = "https://c570-62-226-109-193.ngrok.io/api/laterpay"
     //let apiRoot = "http://192.168.1.100:4200/api/laterpay"
-    let apiRoot = "https://deploy-preview-66--poc-ios.netlify.app/api/laterpay"
+    //let apiRoot = "https://deploy-preview-66--poc-ios.netlify.app/api/laterpay"
+    let apiRoot = "https://poc-ios.netlify.app/api/laterpay"
     var paymentDetails: PaymentDetails? = nil
     let stripeApplePay = StripeApplePayModel()
     var accessValidTo: Date? = nil
@@ -396,6 +397,7 @@ class TapperClientMachine: ObservableObject {
             (_, .checkAccessError(let message)):
             context.isCheckingAccess = false
             context.errorMessage = message
+            shouldShowSheet = false
             currentState = .error
         case
             (.fetchingTab, .fetchTabError(let message)),
@@ -404,6 +406,7 @@ class TapperClientMachine: ObservableObject {
             (.showingApplePayPaymentSheet, .applePayError(let message)),
             (_, .genericError(let message)):
             context.errorMessage = message
+            shouldShowSheet = false
             currentState = .error
         case (_, .checkAccess):
             if !context.isCheckingAccess {
