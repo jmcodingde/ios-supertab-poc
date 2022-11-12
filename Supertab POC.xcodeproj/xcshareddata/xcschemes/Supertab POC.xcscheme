@@ -28,6 +28,17 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DFF6664A291FEAA700D44BED"
+               BuildableName = "Supertab POC Tests.xctest"
+               BlueprintName = "Supertab POC Tests"
+               ReferencedContainer = "container:Supertab POC.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
