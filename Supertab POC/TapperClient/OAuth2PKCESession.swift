@@ -90,7 +90,7 @@ class OAuth2PKCESession: NSObject {
     let callbackURLScheme: String
     let jsonDecoder: JSONDecoder
     let jsonEncoder: JSONEncoder
-    let urlFormDataEncoder: URLFormDataEncoder
+    let urlEncoder: URLEncoder
     
     init(authorizeUrl: String, logoutUrl: String, tokenUrl: String, clientId: String, redirectUri: String, callbackURLScheme: String) {
         self.authorizeUrl = authorizeUrl
@@ -103,8 +103,8 @@ class OAuth2PKCESession: NSObject {
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         self.jsonEncoder = JSONEncoder()
         jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
-        self.urlFormDataEncoder = URLFormDataEncoder()
-        urlFormDataEncoder.keyEncodingStrategy = .convertToSnakeCase
+        self.urlEncoder = URLEncoder()
+        urlEncoder.keyEncodingStrategy = .convertToSnakeCase
     }
     
     public func authenticate() async throws -> AccessTokenResponse {
@@ -121,7 +121,7 @@ class OAuth2PKCESession: NSObject {
         // 4. get authCode by redirecting the user to the authorization server along with the codeChallenge
         let authUrlParams = AuthorizationUrlParameters(codeChallenge: codeChallenge, clientId: clientId, redirectUri: redirectUri, state: state)
         var authUrlComponents = URLComponents(string: url)!
-        authUrlComponents.query = try urlFormDataEncoder.encodeToString(authUrlParams)
+        authUrlComponents.query = try urlEncoder.encodeToString(authUrlParams)
         let authCode: String = try await startWebAuthenticationSession(url: authUrlComponents.url!, state: state, codeVerifier: codeVerifier, codeChallenge: codeChallenge)
         // 5. use authCode and codeVerifier to fetch accessToken and refreshToken
         let tokenResponse = try await getAccessToken(authCode: authCode, codeVerifier: codeVerifier)
@@ -187,7 +187,7 @@ class OAuth2PKCESession: NSObject {
     
     private func getAccessToken(authCode: String, codeVerifier: String) async throws -> AccessTokenResponse {
         let accessTokenRequestBody = AccessTokenRequestBody(clientId: clientId, codeVerifier: codeVerifier, code: authCode, redirectUri: redirectUri)
-        let httpBody = try urlFormDataEncoder.encode(accessTokenRequestBody)
+        let httpBody = try urlEncoder.encode(accessTokenRequestBody)
         let tokenResponse = try await getAccessToken(httpBody: httpBody)
         print("Received response from token request using authCode and codeVerifier: \(tokenResponse)")
         return tokenResponse
@@ -195,7 +195,7 @@ class OAuth2PKCESession: NSObject {
     
     private func getAccessToken(refreshToken: String) async throws -> AccessTokenResponse {
         let accessTokenRefreshRequestBody = AccessTokenRefreshRequestBody(clientId: clientId, refreshToken: refreshToken)
-        let httpBody = try urlFormDataEncoder.encode(accessTokenRefreshRequestBody)
+        let httpBody = try urlEncoder.encode(accessTokenRefreshRequestBody)
         let tokenResponse = try await getAccessToken(httpBody: httpBody)
         print("Received response from token request using refreshToken: \(tokenResponse)")
         return tokenResponse

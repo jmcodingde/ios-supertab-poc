@@ -7,7 +7,7 @@
 
 import Foundation
 
-class URLFormDataEncoder {
+class URLEncoder {
     var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy = .useDefaultKeys {
         didSet {
             jsonEncoder.keyEncodingStrategy = keyEncodingStrategy

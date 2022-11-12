@@ -26,7 +26,7 @@
 		DFF0382C2901ADC300C8BD0A /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = DFF0382B2901ADC300C8BD0A /* Stripe */; };
 		DFF0382E2901ADD300C8BD0A /* StripeApplePayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF0382D2901ADD300C8BD0A /* StripeApplePayModel.swift */; };
 		DFF6664E291FEAA700D44BED /* Supertab_POC_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF6664D291FEAA700D44BED /* Supertab_POC_Tests.swift */; };
-		DFF66657291FF8FD00D44BED /* URLFormDataEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF66656291FF8FD00D44BED /* URLFormDataEncoder.swift */; };
+		DFF66657291FF8FD00D44BED /* URLEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF66656291FF8FD00D44BED /* URLEncoder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,7 +62,7 @@
 		DFF0382F2901B33B00C8BD0A /* Supertab POC.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Supertab POC.entitlements"; sourceTree = "<group>"; };
 		DFF6664B291FEAA700D44BED /* Supertab POC Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Supertab POC Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFF6664D291FEAA700D44BED /* Supertab_POC_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supertab_POC_Tests.swift; sourceTree = "<group>"; };
-		DFF66656291FF8FD00D44BED /* URLFormDataEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLFormDataEncoder.swift; sourceTree = "<group>"; };
+		DFF66656291FF8FD00D44BED /* URLEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLEncoder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +109,7 @@
 				DF66B0AA28FEA79000ABAC6C /* TapperClientMachine.swift */,
 				DFF0382D2901ADD300C8BD0A /* StripeApplePayModel.swift */,
 				DF2C8354291E989F00634D58 /* OAuth2PKCESession.swift */,
-				DFF66656291FF8FD00D44BED /* URLFormDataEncoder.swift */,
+				DFF66656291FF8FD00D44BED /* URLEncoder.swift */,
 			);
 			path = TapperClient;
 			sourceTree = "<group>";
@@ -305,7 +305,7 @@
 				DFC9FAEB28F704B400CBDFA7 /* Supertab_POCApp.swift in Sources */,
 				DFD9801A28F95F4400A58D6E /* MemoryGameCardMachine.swift in Sources */,
 				DF66B0AB28FEA79000ABAC6C /* TapperClientMachine.swift in Sources */,
-				DFF66657291FF8FD00D44BED /* URLFormDataEncoder.swift in Sources */,
+				DFF66657291FF8FD00D44BED /* URLEncoder.swift in Sources */,
 				DFD9801E28F98DBC00A58D6E /* MemoryGameCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
