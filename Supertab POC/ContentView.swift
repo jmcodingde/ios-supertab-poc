@@ -9,14 +9,7 @@ import SwiftUI
 import Combine
 
 struct ContentView: View {
-    var authSession = OAuth2PKCESession(
-        authorizeUrl: "https://auth.sbx.laterpay.net/oauth2/auth",
-        logoutUrl: "https://signon.sbx.supertab.co/oauth2/logout",
-        tokenUrl: "https://auth.sbx.laterpay.net/oauth2/token",
-        clientId: "client.4d1a76a9-27ba-4ae6-8045-a581af101476",
-        redirectUri: "https://e8fe-62-226-109-75.ngrok.io/api/oauth2/callback/supertab-poc",
-        callbackURLScheme: "supertab-poc"
-    )
+    let client = TapperClient()
     var body: some View {
         NavigationView {
             List {
@@ -26,7 +19,7 @@ struct ContentView: View {
                         .padding(.vertical)
                 }
                 .frame(maxWidth: .infinity)
-                NavigationLink(destination: {
+                /*NavigationLink(destination: {
                     PayPerGameView()
                         .padding()
                         .navigationTitle("Pay per Game")
@@ -39,18 +32,18 @@ struct ContentView: View {
                         .navigationTitle("Pay for Access")
                 }) {
                     Text("Pay for Access")
-                }
+                }*/
                 Button {
                     Task {
                         do {
-                            let response = try await authSession.authenticate()
-                            print("Authentication was successful! \(response)")
+                            let tab = try await client.fetchActiveTab()
+                            print("Active tab: \(tab)")
                         } catch(let error) {
-                            print("Authentication failed: \(error)")
+                            print("Fetching tabs failed: \(error.localizedDescription)")
                         }
                     }
                 } label: {
-                    Text("Sign in")
+                    Text("Fetch Tabs")
                 }
             }
         }

@@ -3,7 +3,9 @@
 //  Supertab POC
 //
 //  Created by Jannes Mönnighoff on 11.11.22.
-//  Heaviliy inspired by https://github.com/MarcoEidinger/pkce-ios-swift-auth0server/blob/main/AppUsingPKCE/OAuth2PKCEAuthenticator.swift
+//  Heaviliy inspired by
+//  - https://github.com/MarcoEidinger/pkce-ios-swift-auth0server/blob/main/AppUsingPKCE/OAuth2PKCEAuthenticator.swift
+//  - https://bootstragram.com/blog/oauth-pkce-swift-secure-code-verifiers-and-code-challenges/
 //
 
 import Foundation
@@ -62,7 +64,7 @@ struct AccessTokenRequestBody: Encodable {
     let clientId: String
     let codeVerifier: String
     let code: String
-    let redirectUri: String
+    let redirectUri: URL
 }
 
 struct AccessTokenRefreshRequestBody: Encodable {
@@ -76,25 +78,23 @@ struct AuthorizationUrlParameters: Encodable {
     let codeChallenge: String
     let codeChallengeMethod: String = "S256"
     let clientId: String
-    let redirectUri: String
+    let redirectUri: URL
     let state: String
 }
 
 class OAuth2PKCESession: NSObject {
     
-    let authorizeUrl: String
-    let logoutUrl: String
-    let tokenUrl: String
+    let authorizeUrl: URL
+    let tokenUrl: URL
     let clientId: String
-    let redirectUri: String
+    let redirectUri: URL
     let callbackURLScheme: String
     let jsonDecoder: JSONDecoder
     let jsonEncoder: JSONEncoder
     let urlEncoder: URLEncoder
     
-    init(authorizeUrl: String, logoutUrl: String, tokenUrl: String, clientId: String, redirectUri: String, callbackURLScheme: String) {
+    init(authorizeUrl: URL, tokenUrl: URL, redirectUri: URL, clientId: String, callbackURLScheme: String) {
         self.authorizeUrl = authorizeUrl
-        self.logoutUrl = logoutUrl
         self.tokenUrl = tokenUrl
         self.clientId = clientId
         self.redirectUri = redirectUri
@@ -111,7 +111,7 @@ class OAuth2PKCESession: NSObject {
         return try await authenticate(url: authorizeUrl)
     }
 
-    private func authenticate(url: String) async throws -> AccessTokenResponse {
+    private func authenticate(url: URL) async throws -> AccessTokenResponse {
         // 1. create a random state parameter
         let state = createRandomString(length: 16)
         // 2. and a cryptographically-random codeVerifier
@@ -120,7 +120,7 @@ class OAuth2PKCESession: NSObject {
         let codeChallenge = try createCodeChallenge(for: codeVerifier)
         // 4. get authCode by redirecting the user to the authorization server along with the codeChallenge
         let authUrlParams = AuthorizationUrlParameters(codeChallenge: codeChallenge, clientId: clientId, redirectUri: redirectUri, state: state)
-        var authUrlComponents = URLComponents(string: url)!
+        var authUrlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)!
         authUrlComponents.query = try urlEncoder.encodeToString(authUrlParams)
         let authCode: String = try await startWebAuthenticationSession(url: authUrlComponents.url!, state: state, codeVerifier: codeVerifier, codeChallenge: codeChallenge)
         // 5. use authCode and codeVerifier to fetch accessToken and refreshToken
@@ -202,8 +202,7 @@ class OAuth2PKCESession: NSObject {
     }
     
     private func getAccessToken(httpBody: Data) async throws -> AccessTokenResponse {
-        let url = URL(string: tokenUrl)
-        var request = URLRequest(url: url!)
+        var request = URLRequest(url: tokenUrl)
         request.httpMethod = "POST"
         request.allHTTPHeaderFields = ["content-type": "application/x-www-form-urlencoded"]
         request.httpBody = httpBody
