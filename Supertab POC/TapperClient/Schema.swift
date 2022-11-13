@@ -16,12 +16,12 @@ extension TapperClient {
     
     struct TabResponsePurchaseEnhanced: Codable {
         let id: String
-        let createdAt: String
-        let updatedAt: String
+        let createdAt: Date
+        let updatedAt: Date
         let merchantId: String?
         let userId: String
         let status: TabStatus
-        let paidAt: String?
+        let paidAt: Date?
         let total: Int
         let limit: Int
         let currency: Currency
@@ -53,8 +53,8 @@ extension TapperClient {
     
     struct PurchaseResponseEnhanced: Codable {
         let id: String
-        let createdAt: String
-        let updatedAt: String
+        let createdAt: Date
+        let updatedAt: Date
         let purchaseDate: String
         let merchantId: String
         let summary: String

@@ -24,7 +24,7 @@ class TapperClient {
         oauth2PkceSession = OAuth2PKCESession(authorizeUrl: authorizeUrl, tokenUrl: tokenUrl, redirectUri: redirectUri, clientId: clientId, callbackURLScheme: callbackURLScheme)
         jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-        jsonDecoder.dateDecodingStrategy = .iso8601
+        jsonDecoder.dateDecodingStrategy = .iso8601withFractionalSeconds
     }
     
     enum RequestError: LocalizedError {
@@ -53,20 +53,13 @@ class TapperClient {
         let request = PaginatedTabRequest(baseUrl: apiBaseUrl, params: params, accessToken: apiTokens.accessToken).urlRequest
         
         print("Requesting URL \(request.url!)")
-        
         let (data, rawResponse) = try await URLSession.shared.data(for: request)
         let response = rawResponse as! HTTPURLResponse
-        print("Response status code: \(response.statusCode)")
         switch response.statusCode {
         case 200:
             let result = try! jsonDecoder.decode(PaginatedTabResponse.self, from: data)
-            print(result)
-            if result.data.count > 0 {
-                return result.data[0]
-            } else {
-                return nil
-            }
-        //case 204:
+            print("Received response: \(result)")
+            return result.data.count > 0 ? result.data[0] : nil
         default:
             print("Raw response: \(String(decoding: data, as: UTF8.self))")
             throw RequestError.unexpectedResponseStatusCode(response.statusCode, request.url!)
