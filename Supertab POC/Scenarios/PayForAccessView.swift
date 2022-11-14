@@ -39,18 +39,6 @@ struct PayForAccessView: View {
         }
     }
     
-    func createAccessText() -> String? {
-        if client.context.isCheckingAccess {
-            return "Checking access..."
-        }
-        else if secondsLeft >= 0 {
-            return "\(secondsLeft) seconds left"
-        }
-        else {
-            return nil
-        }
-    }
-    
     var body: some View {
         VStack {
             MemoryGameView(game: game, paused: outOfTime)
@@ -68,8 +56,11 @@ struct PayForAccessView: View {
                 
                 Spacer()
                 
-                if let accessText = createAccessText() {
-                    Text(accessText).opacity(client.context.isCheckingAccess ? 0.5 : 1).transition(.opacity)
+                if client.context.isCheckingAccess {
+                    Text("Checking access...").opacity(0.5).transition(.opacity)
+                }
+                else if secondsLeft >= 0 {
+                    Text("\(secondsLeft) seconds left").transition(.opacity)
                 } else {
                     Button {
                         client.send(.startPurchase)
