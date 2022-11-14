@@ -29,7 +29,7 @@
 		DFF66657291FF8FD00D44BED /* URLEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF66656291FF8FD00D44BED /* URLEncoder.swift */; };
 		DFF66659292141DD00D44BED /* TapperClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF66658292141DD00D44BED /* TapperClient.swift */; };
 		DFF6665B2921499B00D44BED /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF6665A2921499B00D44BED /* Schema.swift */; };
-		DFF6665D2921912900D44BED /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF6665C2921912900D44BED /* Formatter.swift */; };
+		DFF6665D2921912900D44BED /* DateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF6665C2921912900D44BED /* DateFormatter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,7 +68,7 @@
 		DFF66656291FF8FD00D44BED /* URLEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLEncoder.swift; sourceTree = "<group>"; };
 		DFF66658292141DD00D44BED /* TapperClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapperClient.swift; sourceTree = "<group>"; };
 		DFF6665A2921499B00D44BED /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
-		DFF6665C2921912900D44BED /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
+		DFF6665C2921912900D44BED /* DateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,7 +118,7 @@
 				DF66B0AA28FEA79000ABAC6C /* TapperClientMachine.swift */,
 				DFF66656291FF8FD00D44BED /* URLEncoder.swift */,
 				DFF6665A2921499B00D44BED /* Schema.swift */,
-				DFF6665C2921912900D44BED /* Formatter.swift */,
+				DFF6665C2921912900D44BED /* DateFormatter.swift */,
 			);
 			path = TapperClient;
 			sourceTree = "<group>";
@@ -301,7 +301,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DFF6665B2921499B00D44BED /* Schema.swift in Sources */,
-				DFF6665D2921912900D44BED /* Formatter.swift in Sources */,
+				DFF6665D2921912900D44BED /* DateFormatter.swift in Sources */,
 				DF40B3A028FC663F00F754AD /* TabIndicatorView.swift in Sources */,
 				DFF66659292141DD00D44BED /* TapperClient.swift in Sources */,
 				DFD9802428FC566600A58D6E /* PurchaseView.swift in Sources */,

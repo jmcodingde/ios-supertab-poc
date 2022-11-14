@@ -1,5 +1,5 @@
 //
-//  Formatter.swift
+//  DateFormatter.swift
 //  Supertab POC
 //
 //  Created by Jannes Mönnighoff on 13.11.22.
