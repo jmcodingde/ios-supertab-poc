@@ -216,7 +216,7 @@ class TapperClientMachine: ObservableObject {
     @Published private(set) var currentState: TapperClientState {
         didSet {
             // Check if the value will change in order to avoid an infinite loop
-            let check = ![.idle, .fetchingConfig].contains(currentState)
+            let check = ![.idle, .fetchingConfig, .error].contains(currentState)
             if shouldShowSheet != check {
                 shouldShowSheet = check
             }

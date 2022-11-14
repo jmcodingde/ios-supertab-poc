@@ -164,6 +164,13 @@ class OAuth2PKCESession: NSObject {
         try await withCheckedThrowingContinuation { continuation in
             let authenticationSession = ASWebAuthenticationSession(url: url, callbackURLScheme: self.callbackURLScheme) { optionalUrl, optionalError in
                 // authorization server stores the code_challenge and redirects the user back to the application with an authorization code, which is good for one use
+                if optionalError != nil && (optionalError as! ASWebAuthenticationSessionError).code == .canceledLogin {
+                    print("User has canceled the auth session, trying again")
+                    Task {
+                        continuation.resume(returning: try await self.startWebAuthenticationSession(url: url, state: state, codeVerifier: codeVerifier, codeChallenge: codeChallenge))
+                    }
+                    return
+                }
                 guard optionalError == nil else { continuation.resume(throwing: OAuth2PKCEAuthenticatorError.authRequestFailed(optionalError!)); return }
                 guard let url = optionalUrl else { continuation.resume(throwing: OAuth2PKCEAuthenticatorError.authorizeResponseNoUrl); return }
                 guard let authCode = self.getQueryStringParameter("code", from: url) else { continuation.resume(throwing: OAuth2PKCEAuthenticatorError.authorizeResponseNoCode); return }
