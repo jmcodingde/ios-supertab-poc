@@ -100,7 +100,7 @@ extension TapperClient {
         }
     }
     
-    struct Price: Decodable {
+    struct Price: Decodable, Equatable, Hashable {
         let amount: Int
         let currency: Currency
     }
@@ -113,19 +113,19 @@ extension TapperClient {
     
     typealias Metadata = Dictionary<String, String>
     
-    struct RecurringDetails: Decodable {
+    struct RecurringDetails: Decodable, Equatable, Hashable {
         let billingInterval: BillingInterval
         let intervalCount: Int
     }
     
-    enum BillingInterval: String, Decodable {
+    enum BillingInterval: String, Decodable, Equatable {
         case day = "day"
         case week = "week"
         case month = "month"
         case year = "year"
     }
     
-    struct TabStatistics: Decodable {
+    struct TabStatistics: Decodable, Equatable {
         let purchasesCount: Int
         let purchasesNetAmount: Int?
         let obfuscatedPurchasesCount: Int
@@ -159,7 +159,7 @@ extension TapperClient {
     
     // MARK: Response GET /v1/public/items/client/\(params.clientId)/config
     
-    struct ClientConfig: Decodable {
+    struct ClientConfig: Decodable, Equatable {
         let redirectUri: String
         let offerings: [SiteOffering]
         let contentKeys: [SiteContentKey]
@@ -167,25 +167,25 @@ extension TapperClient {
         let testMode: Bool
     }
     
-    struct SiteOffering: Decodable {
+    struct SiteOffering: Decodable, Equatable, Hashable {
         let id: String
         let createdAt: Date
         let updatedAt: Date
         let itemTemplateId: String
         let description: String
         let price: Price
-        let recurringDetails: RecurringDetails?
+        var recurringDetails: RecurringDetails?
         let salesModel: SalesModel
         let paymentModel: PaymentModel
-        let timePassDetails: TimePassDetails?
+        var timePassDetails: TimePassDetails?
         let summary: String
     }
     
-    struct TimePassDetails: Decodable {
+    struct TimePassDetails: Decodable, Equatable, Hashable {
         let validTimedelta: String
     }
     
-    struct SiteContentKey: Decodable {
+    struct SiteContentKey: Decodable, Equatable {
         let itemTemplateId: String
         let itemOfferingIds: [String]
         let contentKey: String
@@ -254,7 +254,10 @@ extension TapperClient {
         let detail: PurchaseDetail
     }
     
-    struct TabResponse: Decodable {
+    struct TabResponse: Decodable, Equatable {
+        static var defaultCurrency = Currency.usd
+        static var defaultLimit = 500
+        
         let id: String
         let createdAt: Date
         let updatedAt: Date
@@ -274,7 +277,7 @@ extension TapperClient {
         let tabStatistics: TabStatistics
     }
     
-    struct PurchaseResponse: Decodable {
+    struct PurchaseResponse: Decodable, Equatable {
         let id: String
         let createdAt: Date
         let updatedAt: Date
@@ -313,7 +316,7 @@ extension TapperClient {
     
     // MARK: Response GET /v1/payment/start/\(tabId)
     
-    struct PaymentStartResponse: Decodable {
+    struct PaymentStartResponse: Decodable, Equatable {
         let clientSecret: String
         let publishableKey: String
     }

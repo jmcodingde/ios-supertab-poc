@@ -7,22 +7,25 @@
 
 import SwiftUI
 
-let payForAccessViewOfferings = [
-    Offering(offeringId: "poc.ios.pay-for-access.30-seconds", summary: "30 sec", price: Price(amount: 50, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "time_pass", validTimedelta: "30s"),
-    Offering(offeringId: "poc.ios.pay-for-access.1-minute", summary: "1 min", price: Price(amount: 100, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "time_pass", validTimedelta: "1m"),
-    Offering(offeringId: "poc.ios.pay-for-access.2-minutes", summary: "2 min", price: Price(amount: 150, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "time_pass", validTimedelta: "2m")
-]
-
 struct PayForAccessView: View {
-    @ObservedObject var client = TapperClientMachine(
-        offerings: payForAccessViewOfferings,
-        defaultOffering: payForAccessViewOfferings[0]
-    )
+    @ObservedObject var client: TapperClientMachine
     @ObservedObject var game = MemoryGameMachine()
     @State var timer = Timer.publish(every: 1, tolerance: 200, on: .main, in: .common).autoconnect()
     @State var secondsLeft: Int = 30
     var outOfTime: Bool {
         secondsLeft <= 0
+    }
+    
+    init(client: TapperClient, siteClientId: String) {
+        self.client = TapperClientMachine(
+            client: client,
+            offeringsMetadata: [
+                ["summary": "30 sec"],
+                ["summary": "1 min"],
+                ["summary": "2 min"]
+            ]
+        )
+        self.client.send(.fetchConfig(siteClientId))
     }
     
     func updateSecondsLeft() {
@@ -92,6 +95,7 @@ struct PayForAccessView: View {
 
 struct PayForAccessView_Preview: PreviewProvider {
     static var previews: some View {
-        PayForAccessView()
+        PayForAccessView(client: TapperClient(), siteClientId: "client.db219fd6-3505-45c8-a44d-4740d28b0e13")
     }
 }
+

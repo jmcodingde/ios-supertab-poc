@@ -15,26 +15,26 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             List {
-                VStack(alignment: .center) {
+                VStack(alignment: .leading) {
                     SupertabLogo()
                         .frame(height: 50)
                         .padding(.vertical)
                 }
                 .frame(maxWidth: .infinity)
-                /*NavigationLink(destination: {
-                    PayPerGameView()
+                NavigationLink(destination: {
+                    PayPerGameView(client: client, siteClientId: "client.d20c6b17-cb04-46df-b94d-5945767ae9bc")
                         .padding()
                         .navigationTitle("Pay per Game")
                 }) {
                     Text("Pay per Game")
                 }
                 NavigationLink(destination: {
-                    PayForAccessView()
+                    PayForAccessView(client: client, siteClientId: "client.db219fd6-3505-45c8-a44d-4740d28b0e13")
                         .padding()
                         .navigationTitle("Pay for Access")
                 }) {
                     Text("Pay for Access")
-                }*/
+                }
                 Button {
                     Task {
                         do {

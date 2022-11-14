@@ -11,7 +11,7 @@ struct TabIndicatorView: View {
     var amount: Int
     var projectedAmount: Int
     var limit: Int
-    var currencyCode: String
+    var currencyCode: TapperClient.Currency
     var gap = Angle.degrees(30.0)
     var lineWidth: CGFloat = 8.0
     var fraction: Double { loading ? 0 : min(max(0, Double(amount) / Double(limit)), 1) }
@@ -45,7 +45,7 @@ struct TabIndicatorView: View {
 
 struct TabIndicatorView_Previews: PreviewProvider {
     static var previews: some View {
-        TabIndicatorView(amount: 150, projectedAmount: 200, limit: 500, currencyCode: "usd", loading: false)
+        TabIndicatorView(amount: 150, projectedAmount: 200, limit: 500, currencyCode: .usd, loading: false)
             .frame(width: 120)
     }
 }
@@ -86,10 +86,10 @@ struct Arc_Previews: PreviewProvider {
     }
 }
 
-func formattedPrice(amount: Int, currencyCode: String, hideDoubleZeroFractionDigits: Bool = false) -> String {
+func formattedPrice(amount: Int, currencyCode: TapperClient.Currency, hideDoubleZeroFractionDigits: Bool = false) -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .currency
-    formatter.currencyCode = currencyCode
+    formatter.currencyCode = currencyCode.rawValue
     let formattedAmount = formatter.string(from: NSNumber(value: Double(amount)/100)) ?? "0"
     if hideDoubleZeroFractionDigits {
         return formattedAmount.replacingOccurrences(of: ".00", with: "")
@@ -101,6 +101,6 @@ func formattedPrice(amount: Int, currencyCode: String, hideDoubleZeroFractionDig
 
 struct FormattedPrice_Previews: PreviewProvider {
     static var previews: some View {
-        Text(formattedPrice(amount: 150, currencyCode: "usd")).bold()
+        Text(formattedPrice(amount: 150, currencyCode: .usd)).bold()
     }
 }

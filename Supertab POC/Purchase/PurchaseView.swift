@@ -69,8 +69,10 @@ struct PurchaseView: View {
             if client.currentState == .showingOfferings || client.currentState == .fetchingTab {
                 let isLoading = client.currentState == .fetchingTab
                 HStack {
-                    ForEach(client.context.offerings, id: \.self) { offering in
+                    ForEach(client.context.offerings.indices, id: \.self) { index in
+                        let offering = client.context.offerings[index]
                         let isSelected = offering == client.context.selectedOffering
+                        let summary = client.context.offeringsMetadata[index]["summary"] ?? offering.summary
                         Button {
                             client.send(.selectOffering(offering))
                         } label: {
@@ -78,7 +80,7 @@ struct PurchaseView: View {
                                 Text("$\(String(format: "%.2f", Float(offering.price.amount)/100.00))")
                                     .bold()
                                     .font(.headline)
-                                Text(offering.summary)
+                                Text(summary)
                                     .font(.subheadline)
                             }
                             .padding()
@@ -206,17 +208,11 @@ struct PurchaseView: View {
     }
 }
 
-let exampleOfferings = [
-    Offering(offeringId: "memoryGame.1-game", summary: "1 game", price: Price(amount: 50, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 1], validTimedelta: nil),
-    Offering(offeringId: "memoryGame.2-games", summary: "2 games", price: Price(amount: 100, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 2], validTimedelta: nil),
-    Offering(offeringId: "memoryGame.5-game2", summary: "5 games", price: Price(amount: 200, currency: "USD"), paymentModel: "pay_merchant_later", salesModel: "single_purchase", metadata: ["numGames": 5], validTimedelta: nil)
-]
-
 struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
         PurchaseView(
             defaultTitle: "Want to play another game?",
-            client: TapperClientMachine(offerings: exampleOfferings, defaultOffering: exampleOfferings[0])
+            client: TapperClientMachine(client: TapperClient())
         )
         .previewDevice(PreviewDevice(rawValue: "iPhone 11"))
     }

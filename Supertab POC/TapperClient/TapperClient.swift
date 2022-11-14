@@ -8,11 +8,11 @@
 import Foundation
 
 class TapperClient {
-    let apiBaseUrl = URL(string: "https://tapi.sbx.laterpay.net")!
-    let authorizeUrl = URL(string: "https://auth.sbx.laterpay.net/oauth2/auth")!
-    let tokenUrl = URL(string: "https://auth.sbx.laterpay.net/oauth2/token")!
+    let apiBaseUrl = URL(string: "https://tapi.laterpay.net")!
+    let authorizeUrl = URL(string: "https://auth.laterpay.net/oauth2/auth")!
+    let tokenUrl = URL(string: "https://auth.laterpay.net/oauth2/token")!
     let redirectUri = URL(string: "https://e8fe-62-226-109-75.ngrok.io/api/oauth2/callback/supertab-poc")!
-    let clientId = "client.4d1a76a9-27ba-4ae6-8045-a581af101476"
+    let clientId = "client.c3c9e7ee-ab50-4cca-91f0-a1153b87ad4d"
     let currency: Currency = .usd
     let paymentModel: PaymentModel = .payLater
     let callbackURLScheme = "supertab-poc"
@@ -122,7 +122,7 @@ class TapperClient {
         }
     }
     
-    func purchase(itemOfferingId: String) async throws -> PurchaseItemResponse {
+    func purchase(itemOfferingId: String, metadata: Metadata? = nil) async throws -> PurchaseItemResponse {
         if apiTokens == nil {
             print("Fetching API tokens...")
             apiTokens = try await oauth2PkceSession.authenticate()
@@ -130,7 +130,7 @@ class TapperClient {
         guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
         
         print("Purchasing...")
-        let params = PurchaseItemOfferingRequestParams(itemOfferingId: itemOfferingId)
+        let params = PurchaseItemOfferingRequestParams(itemOfferingId: itemOfferingId, metadata: metadata)
         let request = PurchaseItemOfferingRequest(baseUrl: apiBaseUrl, params: params, accessToken: apiTokens.accessToken).urlRequest
         
         print("Requesting URL \(request.url!)")
