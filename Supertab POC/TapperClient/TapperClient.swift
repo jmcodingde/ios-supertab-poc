@@ -11,13 +11,13 @@ class TapperClient {
     let apiBaseUrl = URL(string: "https://tapi.laterpay.net")!
     let authorizeUrl = URL(string: "https://auth.laterpay.net/oauth2/auth")!
     let tokenUrl = URL(string: "https://auth.laterpay.net/oauth2/token")!
-    let redirectUri = URL(string: "https://e8fe-62-226-109-75.ngrok.io/api/oauth2/callback/supertab-poc")!
+    let redirectUri = URL(string: "https://ios.poc.laterpay.net/api/oauth2/callback/supertab-poc")!
     let clientId = "client.c3c9e7ee-ab50-4cca-91f0-a1153b87ad4d"
     let currency: Currency = .usd
     let paymentModel: PaymentModel = .payLater
     let callbackURLScheme = "supertab-poc"
     let oauth2PkceSession: OAuth2PKCESession
-    var apiTokens: AccessTokenResponse?
+    var apiTokens: AccessTokenResponseEnhanced?
     let jsonDecoder: JSONDecoder
     let goJsonDecoder: JSONDecoder
     
@@ -47,11 +47,32 @@ class TapperClient {
         }
     }
     
-    func fetchActiveTab() async throws -> TabResponsePurchaseEnhanced? {
+    func authenticate() async throws {
+        print("Fetching API tokens...")
+        apiTokens = try await oauth2PkceSession.authenticate()
+    }
+
+    func ensureValidAccessToken() async throws {
         if apiTokens == nil {
-            print("Fetching API tokens...")
-            apiTokens = try await oauth2PkceSession.authenticate()
+            try await authenticate()
         }
+        guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
+        print("Access token expires at \(apiTokens.expiresAt)")
+        let expiresIn = Int(apiTokens.expiresAt.timeIntervalSinceReferenceDate - Date().timeIntervalSinceReferenceDate)
+        print("Access token expires in \(expiresIn)")
+        if expiresIn < 60 {
+            print("Access token will expire soon or is already expired, attempting to refresh...")
+            do {
+                self.apiTokens = try await oauth2PkceSession.getAccessToken(refreshToken: apiTokens.refreshToken)
+            } catch (let error) {
+                print(error.localizedDescription)
+                try await authenticate()
+            }
+        }
+    }
+    
+    func fetchActiveTab() async throws -> TabResponsePurchaseEnhanced? {
+        try await ensureValidAccessToken()
         guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
         
         print("Fetching tabs...")// with API tokens: \(apiTokens!)")
@@ -73,10 +94,7 @@ class TapperClient {
     }
     
     func fetchClientConfigFor(clientId: String) async throws -> ClientConfig {
-        if apiTokens == nil {
-            print("Fetching API tokens...")
-            apiTokens = try await oauth2PkceSession.authenticate()
-        }
+        try await ensureValidAccessToken()
         guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
         
         print("Fetching client config...")
@@ -98,10 +116,7 @@ class TapperClient {
     }
     
     func checkAccessTo(contentKey: String) async throws -> AccessResponse {
-        if apiTokens == nil {
-            print("Fetching API tokens...")
-            apiTokens = try await oauth2PkceSession.authenticate()
-        }
+        try await ensureValidAccessToken()
         guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
         
         print("Checking access...")
@@ -123,10 +138,7 @@ class TapperClient {
     }
     
     func purchase(itemOfferingId: String, metadata: Metadata? = nil) async throws -> PurchaseItemResponse {
-        if apiTokens == nil {
-            print("Fetching API tokens...")
-            apiTokens = try await oauth2PkceSession.authenticate()
-        }
+        try await ensureValidAccessToken()
         guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
         
         print("Purchasing...")
@@ -148,10 +160,7 @@ class TapperClient {
     }
 
     func startPaymentFor(tabId: String) async throws -> PaymentStartResponse {
-        if apiTokens == nil {
-            print("Fetching API tokens...")
-            apiTokens = try await oauth2PkceSession.authenticate()
-        }
+        try await ensureValidAccessToken()
         guard let apiTokens = apiTokens else { throw RequestError.missingApiTokens }
         
         print("Starting payment...")

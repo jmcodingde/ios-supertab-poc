@@ -12,6 +12,8 @@ struct ContentView: View {
     let client = TapperClient()
     @State var clientConfig: TapperClient.ClientConfig?
     @State var activeTab: TapperClient.TabResponse?
+    @Environment(\.scenePhase) private var scenePhase
+    
     var body: some View {
         NavigationView {
             List {
@@ -29,91 +31,22 @@ struct ContentView: View {
                     Text("Pay per Game")
                 }
                 NavigationLink(destination: {
-                    PayForAccessView(client: client, siteClientId: "client.db219fd6-3505-45c8-a44d-4740d28b0e13")
+                    PayForAccessView(client: client, siteClientId: "client.c8e013f9-86c0-4d36-9a74-381224698c5c")
                         .padding()
                         .navigationTitle("Pay for Access")
                 }) {
                     Text("Pay for Access")
                 }
-                Button {
-                    Task {
-                        do {
-                            activeTab = try await client.fetchActiveTab()?.simpleTabResponse
-                            print("Active tab: \(String(describing: activeTab))")
-                        } catch(let error) {
-                            print("Fetching active tab failed: \(error.localizedDescription)")
-                        }
-                    }
-                } label: {
-                    Text("Fetch Active Tab")
-                }
-                Button {
-                    Task {
-                        do {
-                            clientConfig = try await client.fetchClientConfigFor(clientId: "client.d30c4a23-35ab-468b-b000-84b5c9e1d283")
-                            print("Client config: \(String(describing: clientConfig))")
-                        } catch(let error) {
-                            print("Fetching client config failed: \(error.localizedDescription)")
-                        }
-                    }
-                } label: {
-                    Text("Fetch Config")
-                }
-                Button {
-                    Task {
-                        do {
-                            guard let contentKey = clientConfig?.contentKeys[0].contentKey else {
-                                print("Fetch client config first before checking access")
-                                return
-                            }
-                            let accessResponse = try await client.checkAccessTo(contentKey: contentKey)
-                            print("Access response: \(accessResponse)")
-                        } catch(let error) {
-                            print("Checking access failed: \(error.localizedDescription)")
-                        }
-                    }
-                } label: {
-                    Text("Check access")
-                }
-                Button {
-                    Task {
-                        do {
-                            guard let itemOfferingId = clientConfig?.offerings[0].id else {
-                                print("Fetch client config first before purchasing")
-                                return
-                            }
-                            let purchaseReponse = try await client.purchase(itemOfferingId: itemOfferingId)
-                            print("Purchase response: \(purchaseReponse)")
-                            activeTab = purchaseReponse.tab
-                        } catch(let error) {
-                            print("Purchase failed: \(error.localizedDescription)")
-                        }
-                    }
-                } label: {
-                    Text("Purchase")
-                }
-                Button {
-                    Task {
-                        do {
-                            guard let activeTab = activeTab else {
-                                print("Fetch active tab and/or make a purchase before starting payment")
-                                return
-                            }
-                            guard activeTab.status == .full else {
-                                print("Fill your tab before starting payment")
-                                return
-                            }
-                            let startPaymentResponse = try await client.startPaymentFor(tabId: activeTab.id)
-                            print("Start payment response: \(startPaymentResponse)")
-                        } catch(let error) {
-                            print("Purchase failed: \(error.localizedDescription)")
-                        }
-                    }
-                } label: {
-                    Text("Start payment")
-                }
             }
         }
+        /*.onChange(of: scenePhase) { phase in
+            if phase == .active {
+                Task {
+                    print("Re-authenticating")
+                    try await client.authenticate()
+                }
+            }
+        }*/
     }
 }
 

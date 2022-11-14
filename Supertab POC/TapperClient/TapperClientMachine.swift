@@ -87,7 +87,7 @@ enum TapperClientServices {
                     print(config)
                     send(.fetchConfigDone(config))
                 } catch(let error) {
-                    send(.fetchTabError(error.localizedDescription))
+                    send(.fetchConfigError(error.localizedDescription))
                 }
             }
         default:
@@ -216,8 +216,9 @@ class TapperClientMachine: ObservableObject {
     @Published private(set) var currentState: TapperClientState {
         didSet {
             // Check if the value will change in order to avoid an infinite loop
-            if shouldShowSheet != (currentState != .idle) {
-                shouldShowSheet = currentState != .idle
+            let check = ![.idle, .fetchingConfig].contains(currentState)
+            if shouldShowSheet != check {
+                shouldShowSheet = check
             }
         }
     }

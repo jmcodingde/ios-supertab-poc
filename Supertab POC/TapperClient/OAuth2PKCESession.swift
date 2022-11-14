@@ -59,6 +59,15 @@ struct AccessTokenResponse: Decodable {
     let expiresIn: Int
 }
 
+struct AccessTokenResponseEnhanced {
+    let accessToken: String
+    let refreshToken: String
+    let expiresAt: Date
+    static func from(_ res: AccessTokenResponse) -> Self {
+        return AccessTokenResponseEnhanced(accessToken: res.accessToken, refreshToken: res.refreshToken, expiresAt: Date() + Double(res.expiresIn))
+    }
+}
+
 struct AccessTokenRequestBody: Encodable {
     let grantType: String = "authorization_code"
     let clientId: String
@@ -92,8 +101,10 @@ class OAuth2PKCESession: NSObject {
     let jsonDecoder: JSONDecoder
     let jsonEncoder: JSONEncoder
     let urlEncoder: URLEncoder
+    var accessTokenResponseFuture: Future<AccessTokenResponseEnhanced, Error>? = nil
     
     init(authorizeUrl: URL, tokenUrl: URL, redirectUri: URL, clientId: String, callbackURLScheme: String) {
+        print("Initializing OAuth2PKCESession")
         self.authorizeUrl = authorizeUrl
         self.tokenUrl = tokenUrl
         self.clientId = clientId
@@ -107,25 +118,46 @@ class OAuth2PKCESession: NSObject {
         urlEncoder.keyEncodingStrategy = .convertToSnakeCase
     }
     
-    public func authenticate() async throws -> AccessTokenResponse {
+    public func authenticate() async throws -> AccessTokenResponseEnhanced {
         return try await authenticate(url: authorizeUrl)
     }
 
-    private func authenticate(url: URL) async throws -> AccessTokenResponse {
-        // 1. create a random state parameter
-        let state = createRandomString(length: 16)
-        // 2. and a cryptographically-random codeVerifier
-        let codeVerifier = try createCodeVerifier()
-        // 3. and from this generate a codeChallenge
-        let codeChallenge = try createCodeChallenge(for: codeVerifier)
-        // 4. get authCode by redirecting the user to the authorization server along with the codeChallenge
-        let authUrlParams = AuthorizationUrlParameters(codeChallenge: codeChallenge, clientId: clientId, redirectUri: redirectUri, state: state)
-        var authUrlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)!
-        authUrlComponents.query = try urlEncoder.encodeToString(authUrlParams)
-        let authCode: String = try await startWebAuthenticationSession(url: authUrlComponents.url!, state: state, codeVerifier: codeVerifier, codeChallenge: codeChallenge)
-        // 5. use authCode and codeVerifier to fetch accessToken and refreshToken
-        let tokenResponse = try await getAccessToken(authCode: authCode, codeVerifier: codeVerifier)
-        return tokenResponse
+    private func authenticate(url: URL) async throws -> AccessTokenResponseEnhanced {
+        guard accessTokenResponseFuture == nil else {
+            print("Skipping authentication because there is an auth process ongoing already")
+            return try await accessTokenResponseFuture!.value
+        }
+        accessTokenResponseFuture = Future() { promise in
+            Task {
+                do {
+                    // 1. create a random state parameter
+                    let state = self.createRandomString(length: 16)
+                    // 2. and a cryptographically-random codeVerifier
+                    let codeVerifier = try self.createCodeVerifier()
+                    // 3. and from this generate a codeChallenge
+                    let codeChallenge = try self.createCodeChallenge(for: codeVerifier)
+                    // 4. get authCode by redirecting the user to the authorization server along with the codeChallenge
+                    let authUrlParams = AuthorizationUrlParameters(codeChallenge: codeChallenge, clientId: self.clientId, redirectUri: self.redirectUri, state: state)
+                    var authUrlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+                    authUrlComponents.query = try self.urlEncoder.encodeToString(authUrlParams)
+                    let authCode: String = try await self.startWebAuthenticationSession(url: authUrlComponents.url!, state: state, codeVerifier: codeVerifier, codeChallenge: codeChallenge)
+                    // 5. use authCode and codeVerifier to fetch accessToken and refreshToken
+                    let tokenResponse = try await self.getAccessToken(authCode: authCode, codeVerifier: codeVerifier)
+                    promise(Result.success(tokenResponse))
+                } catch(let error) {
+                    promise(Result.failure(error))
+                }
+            }
+        }
+        do {
+            let accessTokenResponse = try await accessTokenResponseFuture!.value
+            accessTokenResponseFuture = nil
+            return accessTokenResponse
+        } catch (let error) {
+            accessTokenResponseFuture = nil
+            throw error
+        }
+            
     }
     
     private func startWebAuthenticationSession(url: URL, state: String, codeVerifier: String, codeChallenge: String) async throws -> String {
@@ -185,7 +217,7 @@ class OAuth2PKCESession: NSObject {
         }
     }
     
-    private func getAccessToken(authCode: String, codeVerifier: String) async throws -> AccessTokenResponse {
+    func getAccessToken(authCode: String, codeVerifier: String) async throws -> AccessTokenResponseEnhanced {
         let accessTokenRequestBody = AccessTokenRequestBody(clientId: clientId, codeVerifier: codeVerifier, code: authCode, redirectUri: redirectUri)
         let httpBody = try urlEncoder.encode(accessTokenRequestBody)
         let tokenResponse = try await getAccessToken(httpBody: httpBody)
@@ -193,7 +225,7 @@ class OAuth2PKCESession: NSObject {
         return tokenResponse
     }
     
-    private func getAccessToken(refreshToken: String) async throws -> AccessTokenResponse {
+    func getAccessToken(refreshToken: String) async throws -> AccessTokenResponseEnhanced {
         let accessTokenRefreshRequestBody = AccessTokenRefreshRequestBody(clientId: clientId, refreshToken: refreshToken)
         let httpBody = try urlEncoder.encode(accessTokenRefreshRequestBody)
         let tokenResponse = try await getAccessToken(httpBody: httpBody)
@@ -201,7 +233,7 @@ class OAuth2PKCESession: NSObject {
         return tokenResponse
     }
     
-    private func getAccessToken(httpBody: Data) async throws -> AccessTokenResponse {
+    private func getAccessToken(httpBody: Data) async throws -> AccessTokenResponseEnhanced {
         var request = URLRequest(url: tokenUrl)
         request.httpMethod = "POST"
         request.allHTTPHeaderFields = ["content-type": "application/x-www-form-urlencoded"]
@@ -210,7 +242,7 @@ class OAuth2PKCESession: NSObject {
             let (data, _) = try await URLSession.shared.data(for: request)
             do {
                 let tokenResponse = try jsonDecoder.decode(AccessTokenResponse.self, from: data)
-                return tokenResponse
+                return AccessTokenResponseEnhanced.from(tokenResponse)
             } catch {
                 let reason = String(data: data, encoding: .utf8) ?? "Unknown"
                 throw OAuth2PKCEAuthenticatorError.tokenResponseInvalidData(reason)
