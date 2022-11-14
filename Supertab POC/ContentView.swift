@@ -12,7 +12,6 @@ struct ContentView: View {
     let client = TapperClient()
     @State var clientConfig: TapperClient.ClientConfig?
     @State var activeTab: TapperClient.TabResponse?
-    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         NavigationView {
@@ -22,7 +21,6 @@ struct ContentView: View {
                         .frame(height: 50)
                         .padding(.vertical)
                 }
-                .frame(maxWidth: .infinity)
                 NavigationLink(destination: {
                     PayPerGameView(client: client, siteClientId: "client.d20c6b17-cb04-46df-b94d-5945767ae9bc")
                         .padding()
@@ -39,14 +37,6 @@ struct ContentView: View {
                 }
             }
         }
-        /*.onChange(of: scenePhase) { phase in
-            if phase == .active {
-                Task {
-                    print("Re-authenticating")
-                    try await client.authenticate()
-                }
-            }
-        }*/
     }
 }
 
