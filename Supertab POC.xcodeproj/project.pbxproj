@@ -112,13 +112,13 @@
 		DF66B0A928FEA76400ABAC6C /* TapperClient */ = {
 			isa = PBXGroup;
 			children = (
+				DFF6665C2921912900D44BED /* DateFormatter.swift */,
 				DF2C8354291E989F00634D58 /* OAuth2PKCESession.swift */,
+				DFF6665A2921499B00D44BED /* Schema.swift */,
 				DFF0382D2901ADD300C8BD0A /* StripeApplePayModel.swift */,
 				DFF66658292141DD00D44BED /* TapperClient.swift */,
 				DF66B0AA28FEA79000ABAC6C /* TapperClientMachine.swift */,
 				DFF66656291FF8FD00D44BED /* URLEncoder.swift */,
-				DFF6665A2921499B00D44BED /* Schema.swift */,
-				DFF6665C2921912900D44BED /* DateFormatter.swift */,
 			);
 			path = TapperClient;
 			sourceTree = "<group>";
