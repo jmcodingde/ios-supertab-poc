@@ -40,6 +40,12 @@ struct PurchaseView: View {
             return "You've completed your Tab."
         case .tabPaid:
             return "Your Tab has been paid."
+        case .itemAdded:
+            if let summary = tab?.purchases[0].metadata?["summary"] {
+                return "You've added \(summary)"
+            } else {
+                return "Your purchase has been added"
+            }
         default:
             if let tab = tab {
                 return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
@@ -52,6 +58,12 @@ struct PurchaseView: View {
         switch currentState {
         case .fetchingTab:
             return ""
+        case .itemAdded:
+            if let tab = tab {
+                return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
+            } else {
+                return "The Tab makes it easy for you to buy only what you want."
+            }
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
             if let tab = tab {
                 return "Pay your **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** Tab to continue."
@@ -76,7 +88,7 @@ struct PurchaseView: View {
                 .padding(.top)
                 .padding(.bottom)
             
-            if currentState == .showingOfferings || currentState == .fetchingTab {
+            if [.showingOfferings, .fetchingTab].contains(currentState) {
                 let isLoading = currentState == .fetchingTab
                 OfferingsList(offerings: offerings, selectedOffering: selectedOffering, offeringsMetadata: offeringsMetadata, isLoading: isLoading, onSelectOffering: onSelectOffering)
                 .padding(.horizontal)
@@ -111,38 +123,30 @@ struct PurchaseView: View {
                     .transition(.opacity)
             }
             
-            HStack(alignment: .center) {
-                TabIndicatorView(amount: tab?.total ?? 0, projectedAmount: (tab?.total ?? 0) + (selectedOffering?.price.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: currentState == .fetchingTab)
-                    .frame(width: 100, height: 120)
-                    .padding(.leading)
-                    .padding(.vertical)
-                    .id("tabIndicator")
-                VStack(spacing: 10) {
-                    Text(.init(firstParagraph))
-                        .font(.subheadline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .id("firstParagraph")
-                        .transition(.scale)
-                    Text(.init(secondParagraph))
-                        .font(.subheadline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .id("secondParagraph")
-                        .transition(.scale)
+            if [.addingToTab, .itemAdded, .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .tabPaid].contains(currentState) {
+                HStack(alignment: .center) {
+                    TabIndicatorView(amount: tab?.total ?? 0, projectedAmount: (tab?.total ?? 0) + (selectedOffering?.price.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: currentState == .fetchingTab)
+                        .frame(width: 90, height: 90)
+                        .id("tabIndicator")
+                        .padding(.vertical)
+                    VStack(spacing: 10) {
+                        Text(.init(firstParagraph))
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .id("firstParagraph")
+                            .transition(.scale)
+                        Text(.init(secondParagraph))
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .id("secondParagraph")
+                            .transition(.scale)
+                    }
+                    .padding(10)
                 }
-                .padding(10)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal)
+                .padding(.bottom)
             }
-            .frame(maxWidth: .infinity)
-            .background(Color(UIColor.systemBackground))
-            .cornerRadius(10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.primary, lineWidth: 2)
-                    .opacity(0.2)
-                
-            )
-            .padding(.horizontal)
-            .padding(.bottom)
-            .zIndex(1)
             
             if [.paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet].contains(currentState) {
                 Button {
@@ -158,8 +162,6 @@ struct PurchaseView: View {
                 .disabled(currentState != .paymentRequired)
                 .opacity(currentState == .paymentRequired ? 1 : 0.5)
             }
-            
-            Spacer()
             
             if [.itemAdded, .tabPaid].contains(currentState) {
                 Button {
@@ -177,6 +179,7 @@ struct PurchaseView: View {
                 .transition(.opacity)
             }
             
+            Spacer()
             
             HStack(alignment: .center) {
                 Text("Powered by")
@@ -193,7 +196,7 @@ struct PurchaseViewPreview: View {
     let defaultTitle = "Want to play another game?"
     let dismissButtonLabel = "Start a new game"
     let currentState: TapperClientState
-    let tab: Tab? = nil
+    let tab = Tab(id: "tab-1", createdAt: Date.now, updatedAt: Date.now, merchantId: "merchant-1", userId: "user-1", status: .open, paidAt: nil, total: 150, limit: 500, currency: .usd, paymentModel: .payLater, purchases: [], metadata: Metadata(), testMode: false, lpUserId: "lp-user-1", guestEmail: nil, tabStatistics: TapperClient.TabStatistics(purchasesCount: 0, purchasesNetAmount: nil, obfuscatedPurchasesCount: 0, obfuscatedPurchasesTotal: 0))
     let offerings = [
         Offering(id: "offering-1", createdAt: Date.now, updatedAt: Date.now, itemTemplateId: "template-1", description: "Description 1", price: Price(amount: 50, currency: .usd), salesModel: .timePass, paymentModel: .payLater, summary: "Offering Summary 1"),
         Offering(id: "offering-2", createdAt: Date.now, updatedAt: Date.now, itemTemplateId: "template-2", description: "Description 2", price: Price(amount: 100, currency: .usd), salesModel: .timePass, paymentModel: .payLater, summary: "Offering Summary 2"),

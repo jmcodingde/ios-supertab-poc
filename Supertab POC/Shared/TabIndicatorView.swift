@@ -13,12 +13,12 @@ struct TabIndicatorView: View {
     var limit: Int
     var currencyCode: TapperClient.Currency
     var gap = Angle.degrees(30.0)
-    var lineWidth: CGFloat = 8.0
+    var lineWidth: CGFloat = 10.0
     var fraction: Double { loading ? 0 : min(max(0, Double(amount) / Double(limit)), 1) }
     var endAngle: Angle { (.degrees(360.0) - gap) * fraction + gap / 2 }
     var projectedFraction: Double { loading ? 0 : min(max(0, Double(projectedAmount) / Double(limit)), 1) }
     var projectedEndAngle: Angle { (.degrees(360.0) - gap) * projectedFraction + gap / 2 }
-    var fontStyle = Font.subheadline
+    var fontStyle = Font.footnote
     var loading = false
     
     var body: some View {
@@ -27,7 +27,6 @@ struct TabIndicatorView: View {
                 .bold()
                 .font(fontStyle)
                 .foregroundColor(Color.primary)
-                .opacity(0.5)
                 .id("Price")
                 .transition(.scale) // TODO: find out why this is necessary
             Arc(startAngle: gap / 2, endAngle: -gap / 2, clockwise: true, rotationAdjustment: Angle.degrees(270.0))

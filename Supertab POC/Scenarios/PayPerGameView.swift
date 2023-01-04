@@ -55,7 +55,7 @@ struct PayPerGameView: View {
                 client: client
             )
                 .padding(.top, 10)
-                .presentationDetents([.height(520)])
+                .presentationDetents([.height(350)])
                 .presentationDragIndicator(.visible)
         }
     }
