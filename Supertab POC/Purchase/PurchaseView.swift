@@ -9,9 +9,19 @@ import SwiftUI
 
 struct PurchaseView: View {
     let defaultTitle: String;
-    @ObservedObject var client: TapperClientMachine
+    let dismissButtonLabel: String
+    let currentState: TapperClientState
+    let tab: Tab?
+    let selectedOffering: Offering?
+    let offerings: [Offering]
+    let offeringsMetadata: [Metadata]
+    let onSelectOffering: (Offering) -> Void
+    let onAddToTab: (Offering) -> Void
+    let onShowApplePaymentSheet: () -> Void
+    let onDismiss: () -> Void
+    
     var title: String {
-        switch(client.currentState) {
+        switch(currentState) {
         case .addingToTab:
             return "..."
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
@@ -23,7 +33,7 @@ struct PurchaseView: View {
         }
     }
     var firstParagraph: String {
-        switch client.currentState {
+        switch currentState {
         case .fetchingTab:
             return ""
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
@@ -31,7 +41,7 @@ struct PurchaseView: View {
         case .tabPaid:
             return "Your Tab has been paid."
         default:
-            if let tab = client.context.tab {
+            if let tab = tab {
                 return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
             } else {
                 return "The Tab makes it easy for you to buy only what you want."
@@ -39,17 +49,17 @@ struct PurchaseView: View {
         }
     }
     var secondParagraph: String {
-        switch client.currentState {
+        switch currentState {
         case .fetchingTab:
             return ""
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
-            if let tab = client.context.tab {
+            if let tab = tab {
                 return "Pay your **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** Tab to continue."
             }
         case .tabPaid:
             return "You've used **\(formattedPrice(amount: 0, currencyCode: Tab.defaultCurrency))** of your new **\(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))** Tab."
         default:
-            if let _ = client.context.tab {
+            if let _ = tab {
                 return ""
             } else {
                 return "You'll only pay when your Tab reaches \(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))."
@@ -59,24 +69,24 @@ struct PurchaseView: View {
     }
     
     var body: some View {
-        let tab = client.context.tab
+        let tab = tab
         VStack {
             Text(title)
                 .font(.title2)
                 .padding(.top)
                 .padding(.bottom)
             
-            if client.currentState == .showingOfferings || client.currentState == .fetchingTab {
-                let isLoading = client.currentState == .fetchingTab
-                OfferingsList(offerings: client.context.offerings, selectedOffering: client.context.selectedOffering, offeringsMetadata: client.context.offeringsMetadata, isLoading: isLoading, onSelectOffering: client.send)
+            if currentState == .showingOfferings || currentState == .fetchingTab {
+                let isLoading = currentState == .fetchingTab
+                OfferingsList(offerings: offerings, selectedOffering: selectedOffering, offeringsMetadata: offeringsMetadata, isLoading: isLoading, onSelectOffering: onSelectOffering)
                 .padding(.horizontal)
                 .padding(.bottom)
                 .transition(.opacity)
                 .opacity(isLoading ? 0.5 : 1)
                 
                 Button(action: {
-                    if let selectedOffering = client.context.selectedOffering {
-                        client.send(.addToTab(selectedOffering))
+                    if let selectedOffering = selectedOffering {
+                        onAddToTab(selectedOffering)
                     } else {
                         print("Cannot confirm purchase, no offering selected")
                     }
@@ -102,7 +112,7 @@ struct PurchaseView: View {
             }
             
             HStack(alignment: .center) {
-                TabIndicatorView(amount: tab?.total ?? 0, projectedAmount: (tab?.total ?? 0) + (client.context.selectedOffering?.price.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: client.currentState == .fetchingTab)
+                TabIndicatorView(amount: tab?.total ?? 0, projectedAmount: (tab?.total ?? 0) + (selectedOffering?.price.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: currentState == .fetchingTab)
                     .frame(width: 100, height: 120)
                     .padding(.leading)
                     .padding(.vertical)
@@ -134,9 +144,9 @@ struct PurchaseView: View {
             .padding(.bottom)
             .zIndex(1)
             
-            if [.paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet].contains(client.currentState) {
+            if [.paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet].contains(currentState) {
                 Button {
-                    client.send(.showApplePayPaymentSheet)
+                    onShowApplePaymentSheet()
                 } label: {
                     Text("")
                 }
@@ -145,22 +155,22 @@ struct PurchaseView: View {
                 .cornerRadius(.infinity)
                 .padding(.horizontal)
                 .padding(.bottom)
-                .disabled(client.currentState != .paymentRequired)
-                .opacity(client.currentState == .paymentRequired ? 1 : 0.5)
+                .disabled(currentState != .paymentRequired)
+                .opacity(currentState == .paymentRequired ? 1 : 0.5)
             }
             
             Spacer()
             
-            if client.currentState == .itemAdded || client.currentState == .tabPaid {
+            if [.itemAdded, .tabPaid].contains(currentState) {
                 Button {
-                    client.send(.dismiss)
+                    onDismiss()
                 } label: {
-                    Text("Dismiss")
-                        .foregroundColor(Color.primary)
+                    Text(dismissButtonLabel)
+                        .foregroundColor(Color(UIColor.systemBackground))
                         .frame(maxWidth: .infinity)
                         .padding()
                 }
-                .background(Color.primary.opacity(0.2))
+                .background(Color.primary)
                 .cornerRadius(.infinity)
                 .padding(.horizontal)
                 .padding(.bottom)
@@ -179,12 +189,51 @@ struct PurchaseView: View {
     }
 }
 
+struct PurchaseViewPreview: View {
+    let defaultTitle = "Want to play another game?"
+    let dismissButtonLabel = "Start a new game"
+    let currentState: TapperClientState
+    let tab: Tab? = nil
+    let offerings = [
+        Offering(id: "offering-1", createdAt: Date.now, updatedAt: Date.now, itemTemplateId: "template-1", description: "Description 1", price: Price(amount: 50, currency: .usd), salesModel: .timePass, paymentModel: .payLater, summary: "Offering Summary 1"),
+        Offering(id: "offering-2", createdAt: Date.now, updatedAt: Date.now, itemTemplateId: "template-2", description: "Description 2", price: Price(amount: 100, currency: .usd), salesModel: .timePass, paymentModel: .payLater, summary: "Offering Summary 2"),
+        Offering(id: "offering-3", createdAt: Date.now, updatedAt: Date.now, itemTemplateId: "template-3", description: "Description 3", price: Price(amount: 200, currency: .usd), salesModel: .timePass, paymentModel: .payLater, summary: "Offering Summary 3")
+    ]
+    @State var selectedOffering: Offering?
+    let metadata = [
+        ["summary": "Summary 1"],
+        ["summary": "Summary 2"],
+        ["summary": "Summary 3"]
+    ]
+    
+    init(currentState: TapperClientState? = nil) {
+        self.currentState = currentState ?? TapperClientState.showingOfferings
+    }
+    
+    func onSelectOffering(offering: Offering) -> Void {
+        print("onSelectOffering: \(offering)")
+        selectedOffering = offering
+    }
+    func onAddToTab(offering: Offering) -> Void {
+        print("onAddToTab: \(offering)")
+    }
+    func onShowApplePaymentSheet() -> Void {
+        print("onShowApplePaymentSheet")
+    }
+    func onDismiss() -> Void {
+        print("onDismiss")
+    }
+    
+    var body: some View {
+        PurchaseView(defaultTitle: defaultTitle, dismissButtonLabel: dismissButtonLabel, currentState: currentState, tab: tab, selectedOffering: selectedOffering ?? offerings[0], offerings: offerings, offeringsMetadata: metadata, onSelectOffering: onSelectOffering, onAddToTab: onAddToTab, onShowApplePaymentSheet: onShowApplePaymentSheet, onDismiss: onDismiss)
+    }
+}
+
 struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
-        PurchaseView(
-            defaultTitle: "Want to play another game?",
-            client: TapperClientMachine(client: TapperClient())
-        )
-        .previewDevice(PreviewDevice(rawValue: "iPhone 11"))
+        PurchaseViewPreview(currentState: .fetchingTab).previewDisplayName("fetchingTab")
+        PurchaseViewPreview(currentState: .showingOfferings).previewDisplayName("showingOfferings")
+        PurchaseViewPreview(currentState: .addingToTab).previewDisplayName("addingToTab")
+        PurchaseViewPreview(currentState: .itemAdded).previewDisplayName("itemAdded")
     }
 }

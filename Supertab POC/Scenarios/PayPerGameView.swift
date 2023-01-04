@@ -49,8 +49,9 @@ struct PayPerGameView: View {
         .sheet(isPresented: $client.shouldShowSheet, onDismiss: {
             client.send(.dismiss)
         }) {
-            PurchaseView(
+            PurchaseViewWrapper(
                 defaultTitle: "Want to play another game?",
+                dismissButtonLabel: "Start a new game",
                 client: client
             )
                 .padding(.top, 10)

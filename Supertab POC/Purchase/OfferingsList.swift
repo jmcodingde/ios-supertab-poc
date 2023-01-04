@@ -12,7 +12,7 @@ struct OfferingsList: View {
     let selectedOffering: Offering?
     let offeringsMetadata: [Metadata]
     let isLoading: Bool
-    let onSelectOffering: (TapperClientEvent) -> Void
+    let onSelectOffering: (Offering) -> Void
     
     var body: some View {
         HStack {
@@ -21,7 +21,7 @@ struct OfferingsList: View {
                 let isSelected = offering == selectedOffering
                 let summary = offeringsMetadata[index]["summary"] ?? offering.summary
                 Button {
-                    onSelectOffering(.selectOffering(offering))
+                    onSelectOffering(offering)
                 } label: {
                     VStack {
                         Text("$\(String(format: "%.2f", Float(offering.price.amount)/100.00))")
@@ -65,14 +65,9 @@ struct OfferingsListInteractivePreview: View {
     ]
     let isLoading = false
     
-    func onSelectOffering(event: TapperClientEvent) -> Void {
-        print(event)
-        switch(event) {
-        case .selectOffering(let offering):
-            selectedOffering = offering
-        default:
-            print("noop")
-        }
+    func onSelectOffering(offering: Offering) -> Void {
+        print(offering)
+        selectedOffering = offering
     }
     
     var body: some View {

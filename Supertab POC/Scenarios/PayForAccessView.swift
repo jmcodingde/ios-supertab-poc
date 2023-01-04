@@ -74,8 +74,9 @@ struct PayForAccessView: View {
         }
         .padding()
         .sheet(isPresented: $client.shouldShowSheet, onDismiss: { client.send(.dismiss) }) {
-            PurchaseView(
+            PurchaseViewWrapper(
                 defaultTitle: "Want to continue playing?",
+                dismissButtonLabel: "Continue playing",
                 client: client
             )
             .padding(.top, 10)
