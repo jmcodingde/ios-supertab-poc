@@ -68,36 +68,7 @@ struct PurchaseView: View {
             
             if client.currentState == .showingOfferings || client.currentState == .fetchingTab {
                 let isLoading = client.currentState == .fetchingTab
-                HStack {
-                    ForEach(client.context.offerings.indices, id: \.self) { index in
-                        let offering = client.context.offerings[index]
-                        let isSelected = offering == client.context.selectedOffering
-                        let summary = client.context.offeringsMetadata[index]["summary"] ?? offering.summary
-                        Button {
-                            client.send(.selectOffering(offering))
-                        } label: {
-                            VStack {
-                                Text("$\(String(format: "%.2f", Float(offering.price.amount)/100.00))")
-                                    .bold()
-                                    .font(.headline)
-                                Text(summary)
-                                    .font(.subheadline)
-                            }
-                            .padding()
-                            .foregroundColor(isSelected ? Color(UIColor.systemBackground) : .primary)
-                            .frame(maxWidth: .infinity)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: .infinity)
-                                    .stroke(Color.primary, lineWidth: 3)
-                                    .opacity(isLoading ? 0.4 : 1)
-                            )
-                            
-                        }
-                        .background(isSelected ? Color.primary : Color(UIColor.systemBackground))
-                        .clipShape(Capsule())
-                        
-                    }
-                }
+                OfferingsList(offerings: client.context.offerings, selectedOffering: client.context.selectedOffering, offeringsMetadata: client.context.offeringsMetadata, isLoading: isLoading, onSelectOffering: client.send)
                 .padding(.horizontal)
                 .padding(.bottom)
                 .transition(.opacity)

@@ -9,7 +9,7 @@ import Foundation
 import Stripe
 import SwiftUI
 
-enum TapperClientState: Equatable {
+enum TapperClientState: String {
     case noConfig
     case fetchingConfig
     case idle

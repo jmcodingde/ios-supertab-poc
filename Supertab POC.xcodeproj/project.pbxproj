@@ -14,6 +14,7 @@
 		DF6117F629059E58000614FF /* PayForAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF6117F529059E58000614FF /* PayForAccessView.swift */; };
 		DF66B0A828FDB98F00ABAC6C /* ApplePayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF66B0A728FDB98F00ABAC6C /* ApplePayButton.swift */; };
 		DF66B0AB28FEA79000ABAC6C /* TapperClientMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF66B0AA28FEA79000ABAC6C /* TapperClientMachine.swift */; };
+		DF91C97A29658AD800B389E1 /* OfferingsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF91C97929658AD800B389E1 /* OfferingsList.swift */; };
 		DFC9FAEB28F704B400CBDFA7 /* Supertab_POCApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */; };
 		DFC9FAED28F704B400CBDFA7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */; };
 		DFC9FAEF28F704B500CBDFA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFC9FAEE28F704B500CBDFA7 /* Assets.xcassets */; };
@@ -51,6 +52,7 @@
 		DF6117F529059E58000614FF /* PayForAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayForAccessView.swift; sourceTree = "<group>"; };
 		DF66B0A728FDB98F00ABAC6C /* ApplePayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayButton.swift; sourceTree = "<group>"; };
 		DF66B0AA28FEA79000ABAC6C /* TapperClientMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapperClientMachine.swift; sourceTree = "<group>"; };
+		DF91C97929658AD800B389E1 /* OfferingsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferingsList.swift; sourceTree = "<group>"; };
 		DFC9FAE728F704B400CBDFA7 /* Supertab POC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Supertab POC.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFC9FAEA28F704B400CBDFA7 /* Supertab_POCApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supertab_POCApp.swift; sourceTree = "<group>"; };
 		DFC9FAEC28F704B400CBDFA7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				DFD9802328FC566600A58D6E /* PurchaseView.swift */,
+				DF91C97929658AD800B389E1 /* OfferingsList.swift */,
 			);
 			path = Purchase;
 			sourceTree = "<group>";
@@ -317,6 +320,7 @@
 				DFC9FAEB28F704B400CBDFA7 /* Supertab_POCApp.swift in Sources */,
 				DFD9801A28F95F4400A58D6E /* MemoryGameCardMachine.swift in Sources */,
 				DF66B0AB28FEA79000ABAC6C /* TapperClientMachine.swift in Sources */,
+				DF91C97A29658AD800B389E1 /* OfferingsList.swift in Sources */,
 				DFF66657291FF8FD00D44BED /* URLEncoder.swift in Sources */,
 				DFD9801E28F98DBC00A58D6E /* MemoryGameCardView.swift in Sources */,
 			);
