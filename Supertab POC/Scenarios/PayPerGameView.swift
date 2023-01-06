@@ -17,9 +17,9 @@ struct PayPerGameView: View {
         self.client = TapperClientMachine(
             client: client,
             offeringsMetadata: [
-                ["numGames": "1", "summary": "1 Game"],
-                ["numGames": "2", "summary": "2 Games"],
-                ["numGames": "5", "summary": "5 Games"]
+                ["numGames": "1", "summary": "1 game"],
+                ["numGames": "2", "summary": "2 games"],
+                ["numGames": "5", "summary": "5 games"]
             ],
             onAddedToTab: { purchase in
                 print("This purchase was just made: \(purchase)")
@@ -52,11 +52,12 @@ struct PayPerGameView: View {
             PurchaseViewWrapper(
                 defaultTitle: "Want to play another game?",
                 dismissButtonLabel: "Start a new game",
+                showCloseButton: true,
                 client: client
             )
-                .padding(.top, 10)
-                .presentationDetents([.height(350)])
-                .presentationDragIndicator(.visible)
+                .presentationDetents([.height(260)])
+                //.interactiveDismissDisabled()
+                //.presentationDragIndicator(.visible)
         }
     }
 }

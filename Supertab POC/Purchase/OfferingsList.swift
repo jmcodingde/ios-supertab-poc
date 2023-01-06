@@ -24,13 +24,10 @@ struct OfferingsList: View {
                     onSelectOffering(offering)
                 } label: {
                     VStack {
-                        Text("$\(String(format: "%.2f", Float(offering.price.amount)/100.00))")
-                            .bold()
-                            .font(.headline)
-                        Text(summary)
-                            .font(.subheadline)
+                        Text(formattedPrice(amount: offering.price.amount, currencyCode: offering.price.currency)).font(.custom("Helvetica Neue Bold", size: 16)).tracking(0.16)
+                        Text(summary).font(.custom("Helvetica Neue Regular", size: 12)).tracking(0.12)
                     }
-                    .padding()
+                    .frame(height: 55)
                     .foregroundColor(isSelected ? Color(UIColor.systemBackground) : .primary)
                     .frame(maxWidth: .infinity)
                     .overlay(

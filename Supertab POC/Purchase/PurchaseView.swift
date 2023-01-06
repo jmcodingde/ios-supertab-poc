@@ -19,6 +19,7 @@ struct PurchaseView: View {
     let onAddToTab: (Offering) -> Void
     let onShowApplePaymentSheet: () -> Void
     let onDismiss: () -> Void
+    let showCloseButton: Bool
     
     var title: String {
         switch(currentState) {
@@ -37,20 +38,23 @@ struct PurchaseView: View {
         case .fetchingTab:
             return ""
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
-            return "You've completed your Tab."
+            return "You've completed your Tab"
         case .tabPaid:
-            return "Your Tab has been paid."
+            return "Your Tab has been paid"
+        case .addingToTab:
+            return "..."
         case .itemAdded:
-            if let summary = tab?.purchases[0].metadata?["summary"] {
-                return "You've added \(summary)"
-            } else {
-                return "Your purchase has been added"
+            if tab?.purchases.count ?? 0 > 0 {
+                if let summary = tab?.purchases[0].metadata?["summary"] {
+                    return "You've added \(summary)"
+                }
             }
+            return "Your purchase has been added"
         default:
             if let tab = tab {
                 return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
             } else {
-                return "The Tab makes it easy for you to buy only what you want."
+                return "The Tab makes it easy for you to buy only what you want"
             }
         }
     }
@@ -58,18 +62,18 @@ struct PurchaseView: View {
         switch currentState {
         case .fetchingTab:
             return ""
-        case .itemAdded:
+        case .addingToTab, .itemAdded:
             if let tab = tab {
-                return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab."
+                return "You've used **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** of your **\(formattedPrice(amount: tab.limit, currencyCode: tab.currency))** Tab"
             } else {
-                return "The Tab makes it easy for you to buy only what you want."
+                return "The Tab makes it easy for you to buy only what you want"
             }
         case .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet:
             if let tab = tab {
-                return "Pay your **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** Tab to continue."
+                return "Pay your **\(formattedPrice(amount: tab.total, currencyCode: tab.currency))** Tab to continue"
             }
         case .tabPaid:
-            return "You've used **\(formattedPrice(amount: 0, currencyCode: Tab.defaultCurrency))** of your new **\(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))** Tab."
+            return "You've used **\(formattedPrice(amount: 0, currencyCode: Tab.defaultCurrency))** of your new **\(formattedPrice(amount: Tab.defaultLimit, currencyCode: Tab.defaultCurrency))**\u{00a0}Tab"
         default:
             if let _ = tab {
                 return ""
@@ -82,17 +86,32 @@ struct PurchaseView: View {
     
     var body: some View {
         let tab = tab
-        VStack {
-            Text(title)
-                .font(.title2)
-                .padding(.top)
-                .padding(.bottom)
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                Text(title)
+                    .font(.custom("Helvetica Neue Bold", size: 18))
+                    .lineSpacing(10)
+                    .multilineTextAlignment(.center)
+                    .padding(.leading, showCloseButton ? 17 : 0)
+                Spacer()
+                if showCloseButton {
+                    Button {
+                        onDismiss()
+                    } label: {
+                        Image(systemName: "xmark").foregroundColor(.primary).opacity(0.6)
+                            .frame(width: 17, height: 17)
+                    }
+                }
+            }
+            .padding(.top, 26.46)
+            .padding(.horizontal, 20)
             
             if [.showingOfferings, .fetchingTab].contains(currentState) {
                 let isLoading = currentState == .fetchingTab
                 OfferingsList(offerings: offerings, selectedOffering: selectedOffering, offeringsMetadata: offeringsMetadata, isLoading: isLoading, onSelectOffering: onSelectOffering)
                 .padding(.horizontal)
-                .padding(.bottom)
+                .padding(.top, 26.46)
                 .transition(.opacity)
                 .opacity(isLoading ? 0.5 : 1)
                 
@@ -104,44 +123,50 @@ struct PurchaseView: View {
                     }
                 }) {
                     Text("Put it on my Tab")
+                        .font(.custom("Helvetica Neue Bold", size: 16))
                         .foregroundColor(Color(UIColor.systemBackground))
+                        .tracking(-0.16)
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .frame(height: 52.82)
                 }
                 .background(Color.primary)
                 .clipShape(Capsule())
                 .padding(.horizontal)
-                .padding(.bottom)
+                .padding(.top, 15.6)
                 .transition(.opacity)
                 .opacity(isLoading ? 0.5 : 1)
                 
-                Text("No credit card required")
-                    .opacity(0.5)
+                //No credit card required
+                Text("No credit card required").font(.custom("Helvetica Neue Regular", size: 14)).tracking(0.14).lineSpacing(10).multilineTextAlignment(.center)
+                    .opacity(0.6)
                     .padding(.horizontal)
-                    .padding(.bottom)
+                    .padding(.top, 17)
                     .frame(maxWidth: .infinity)
                     .transition(.opacity)
             }
             
             if [.addingToTab, .itemAdded, .paymentRequired, .fetchingPaymentDetails, .showingApplePayPaymentSheet, .tabPaid].contains(currentState) {
-                HStack(alignment: .center) {
+                HStack(alignment: .center, spacing: 20) {
                     TabIndicatorView(amount: tab?.total ?? 0, projectedAmount: (tab?.total ?? 0) + (selectedOffering?.price.amount ?? 0), limit: tab?.limit ?? Tab.defaultLimit, currencyCode: tab?.currency ?? Tab.defaultCurrency, loading: currentState == .fetchingTab)
-                        .frame(width: 90, height: 90)
+                        .frame(width: 70, height: 70)
                         .id("tabIndicator")
-                        .padding(.vertical)
                     VStack(spacing: 10) {
                         Text(.init(firstParagraph))
-                            .font(.headline)
+                            .font(.custom("Helvetica Neue Medium", size: 16))
+                            .lineSpacing(10)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .id("firstParagraph")
-                            .transition(.scale)
+                            //.transition(.scale)
                         Text(.init(secondParagraph))
-                            .font(.subheadline)
+                            .font(.custom("Helvetica Neue", size: 14))
+                            .opacity(0.6)
+                            .lineSpacing(6)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .id("secondParagraph")
-                            .transition(.scale)
+                            //.transition(.scale)
                     }
-                    .padding(10)
+                    .frame(height: 90)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal)
@@ -168,9 +193,12 @@ struct PurchaseView: View {
                     onDismiss()
                 } label: {
                     Text(dismissButtonLabel)
+                        .font(.custom("Helvetica Neue Bold", size: 16))
                         .foregroundColor(Color(UIColor.systemBackground))
+                        .tracking(-0.16)
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .frame(height: 52.82)
                 }
                 .background(Color.primary)
                 .cornerRadius(.infinity)
@@ -178,16 +206,17 @@ struct PurchaseView: View {
                 .padding(.bottom)
                 .transition(.opacity)
             }
-            
+
             Spacer()
             
-            HStack(alignment: .center) {
+            /*HStack(alignment: .center) {
                 Text("Powered by")
                     .font(.subheadline)
                 SupertabLogo()
                     .frame(height: 20)
                     .padding(.vertical)
-            }
+            }*/
+        
         }
     }
 }
@@ -227,8 +256,17 @@ struct PurchaseViewPreview: View {
         print("onDismiss")
     }
     
+    @State var isPresented = true
+    
     var body: some View {
-        PurchaseView(defaultTitle: defaultTitle, dismissButtonLabel: dismissButtonLabel, currentState: currentState, tab: tab, selectedOffering: selectedOffering ?? offerings[0], offerings: offerings, offeringsMetadata: metadata, onSelectOffering: onSelectOffering, onAddToTab: onAddToTab, onShowApplePaymentSheet: onShowApplePaymentSheet, onDismiss: onDismiss)
+        HStack {}
+            .sheet(isPresented: $isPresented) {
+                PurchaseView(defaultTitle: defaultTitle, dismissButtonLabel: dismissButtonLabel, currentState: currentState, tab: tab, selectedOffering: selectedOffering ?? offerings[0], offerings: offerings, offeringsMetadata: metadata, onSelectOffering: onSelectOffering, onAddToTab: onAddToTab, onShowApplePaymentSheet: onShowApplePaymentSheet, onDismiss: onDismiss, showCloseButton: true)
+                    .padding(.top, 10)
+                    .presentationDetents([.height(260)])
+                    .interactiveDismissDisabled()
+                    //.presentationDragIndicator(.visible)
+            }
     }
 }
 
@@ -238,5 +276,6 @@ struct PurchaseView_Previews: PreviewProvider {
         PurchaseViewPreview(currentState: .showingOfferings).previewDisplayName("showingOfferings")
         PurchaseViewPreview(currentState: .addingToTab).previewDisplayName("addingToTab")
         PurchaseViewPreview(currentState: .itemAdded).previewDisplayName("itemAdded")
+        PurchaseViewPreview(currentState: .tabPaid).previewDisplayName("tabPaid")
     }
 }

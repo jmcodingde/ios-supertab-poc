@@ -77,11 +77,12 @@ struct PayForAccessView: View {
             PurchaseViewWrapper(
                 defaultTitle: "Want to continue playing?",
                 dismissButtonLabel: "Continue playing",
+                showCloseButton: true,
                 client: client
             )
-            .padding(.top, 10)
-            .presentationDetents([.height(350)])
-            .presentationDragIndicator(.visible)
+            .presentationDetents([.height(260)])
+            //.interactiveDismissDisabled()
+            //.presentationDragIndicator(.visible)
         }
         .onChange(of: client.context.isCheckingAccess) { _ in
             updateSecondsLeft()

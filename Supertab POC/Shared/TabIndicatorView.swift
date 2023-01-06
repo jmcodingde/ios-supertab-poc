@@ -13,19 +13,18 @@ struct TabIndicatorView: View {
     var limit: Int
     var currencyCode: TapperClient.Currency
     var gap = Angle.degrees(30.0)
-    var lineWidth: CGFloat = 10.0
+    var lineWidth: CGFloat = 8
     var fraction: Double { loading ? 0 : min(max(0, Double(amount) / Double(limit)), 1) }
     var endAngle: Angle { (.degrees(360.0) - gap) * fraction + gap / 2 }
     var projectedFraction: Double { loading ? 0 : min(max(0, Double(projectedAmount) / Double(limit)), 1) }
     var projectedEndAngle: Angle { (.degrees(360.0) - gap) * projectedFraction + gap / 2 }
-    var fontStyle = Font.footnote
     var loading = false
     
     var body: some View {
         ZStack {
             Text(loading ? "..." : formattedPrice(amount: amount, currencyCode: currencyCode))
                 .bold()
-                .font(fontStyle)
+                .font(.custom("Helvetica Neue Bold", size: 15))
                 .foregroundColor(Color.primary)
                 .id("Price")
                 .transition(.scale) // TODO: find out why this is necessary
@@ -45,7 +44,7 @@ struct TabIndicatorView: View {
 struct TabIndicatorView_Previews: PreviewProvider {
     static var previews: some View {
         TabIndicatorView(amount: 150, projectedAmount: 200, limit: 500, currencyCode: .usd, loading: false)
-            .frame(width: 120)
+            .frame(width: 70)
     }
 }
 
@@ -87,6 +86,7 @@ struct Arc_Previews: PreviewProvider {
 
 func formattedPrice(amount: Int, currencyCode: TapperClient.Currency, hideDoubleZeroFractionDigits: Bool = false) -> String {
     let formatter = NumberFormatter()
+    formatter.locale = .init(identifier: "en-US")
     formatter.numberStyle = .currency
     formatter.currencyCode = currencyCode.rawValue
     let formattedAmount = formatter.string(from: NSNumber(value: Double(amount)/100)) ?? "0"
